@@ -483,11 +483,47 @@ let S = {...DEF};
 let activeDay = null;
 let prevScreen = 'inicio'; // para voltar da biblioteca/dia
 
-function save(){ localStorage.setItem('rr3',JSON.stringify(S)); }
+/* ─── localStorage (cache rápido) ─── */
+function save(){
+  localStorage.setItem('rr3',JSON.stringify(S));
+  syncToCloud();
+}
 function load(){
   try { const r=localStorage.getItem('rr3'); if(r){S={...DEF,...JSON.parse(r)};return true;} } catch(e){}
   return false;
 }
+
+/* ─── Supabase sync ─── */
+let _syncT;
+function syncToCloud(){
+  if(!S.token) return;
+  clearTimeout(_syncT);
+  _syncT=setTimeout(async()=>{
+    try {
+      await fetch('/api/save-progress',{
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({token:S.token, data:S})
+      });
+    } catch(e){ /* falha silenciosa — dados já estão no localStorage */ }
+  }, 1500);
+}
+
+async function loadFromCloud(token){
+  try {
+    const res=await fetch('/api/load-progress',{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({token})
+    });
+    const result=await res.json();
+    if(result.ok && result.data){
+      S={...DEF,...result.data, token};
+      localStorage.setItem('rr3',JSON.stringify(S));
+      return true;
+    }
+  } catch(e){}
+  return false;
+}
+
 function updateStreak(){
   const today=new Date().toDateString();
   if(S.lastOpened===today) return;
@@ -552,8 +588,13 @@ async function handleAccess(){
     const res=await fetch('/api/validate-token',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:val})});
     const data=await res.json();
     if(data.valid){
-      S.token=val;
-      if(!S.startDate) S.startDate=new Date().toISOString();
+      btn.textContent='CARREGANDO...';
+      // Tenta restaurar progresso salvo na nuvem
+      const restored=await loadFromCloud(val);
+      if(!restored){
+        S.token=val;
+        if(!S.startDate) S.startDate=new Date().toISOString();
+      }
       updateStreak(); save();
       renderInicio(); navTo('inicio');
     } else {
@@ -998,9 +1039,17 @@ function completeDay(id){
 /* ═══════════════════════════
    BOOT
 ═══════════════════════════ */
-function boot(){
-  if(load()&&S.token){ updateStreak(); renderInicio(); navTo('inicio'); }
-  else { show('access'); document.getElementById('tokenInput').focus(); }
+async function boot(){
+  if(load()&&S.token){
+    // Tem sessão local — abre imediatamente e sincroniza em background
+    updateStreak(); renderInicio(); navTo('inicio');
+    loadFromCloud(S.token).then(restored=>{
+      if(restored){ updateStreak(); renderInicio(); }
+    });
+  } else {
+    show('access');
+    document.getElementById('tokenInput').focus();
+  }
 }
 
 if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
