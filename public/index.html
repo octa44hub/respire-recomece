@@ -125,14 +125,11 @@
 
     /* ─── ACCESS SCREEN ─── */
     #screen-access {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 100%;
-      padding: 48px 28px 56px;
-      background: linear-gradient(155deg, #1E3325 0%, var(--green-dark) 45%, var(--green-mid) 100%);
+      display: block;
       overflow-y: auto;
+      padding: 10vh 28px 60px;
+      background: linear-gradient(155deg, #1E3325 0%, var(--green-dark) 45%, var(--green-mid) 100%);
+      text-align: center;
     }
 
     .access-logo { text-align: center; margin-bottom: 48px; }
@@ -173,11 +170,12 @@
 
     .access-card {
       width: 100%;
-      background: rgba(255,255,255,.07);
-      border: 1px solid rgba(255,255,255,.12);
+      max-width: 400px;
+      margin: 0 auto;
+      background: rgba(255,255,255,.10);
+      border: 1px solid rgba(255,255,255,.15);
       border-radius: 22px;
       padding: 32px 24px;
-      backdrop-filter: blur(8px);
     }
 
     .access-card h2 {
@@ -1087,20 +1085,42 @@ function renderAccess() {
 
 function _tokenKeydown(e) { if (e.key === 'Enter') handleAccess(); }
 
-function handleAccess() {
+async function handleAccess() {
   const val = document.getElementById('tokenInput').value.trim().toUpperCase();
   const err = document.getElementById('accessError');
-  // Aceita qualquer token com 6+ caracteres (produção: validar contra Supabase)
-  if (val.length >= 6) {
-    S.token = val;
-    if (!S.startDate) S.startDate = new Date().toISOString();
-    updateStreak();
-    saveState();
-    err.style.display = 'none';
-    renderHome();
-    show('home');
-  } else {
+  const btn = document.querySelector('#screen-access .btn-primary');
+
+  if (val.length < 6) { err.style.display = 'block'; return; }
+
+  btn.textContent = 'VERIFICANDO...';
+  btn.disabled = true;
+
+  try {
+    const res = await fetch('/api/validate-token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: val })
+    });
+    const data = await res.json();
+
+    if (data.valid) {
+      S.token = val;
+      if (!S.startDate) S.startDate = new Date().toISOString();
+      updateStreak();
+      saveState();
+      err.style.display = 'none';
+      renderHome();
+      show('home');
+    } else {
+      err.style.display = 'block';
+      btn.textContent = 'ACESSAR MINHA JORNADA';
+      btn.disabled = false;
+    }
+  } catch (e) {
+    err.textContent = 'Erro de conexão. Tente novamente.';
     err.style.display = 'block';
+    btn.textContent = 'ACESSAR MINHA JORNADA';
+    btn.disabled = false;
   }
 }
 
