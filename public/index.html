@@ -13,197 +13,172 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
   <style>
-    /* ── RESET ── */
     *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
     html { height:100%; }
     body { height:100%; font-family:'Jost',sans-serif; background:#1E3325; -webkit-font-smoothing:antialiased; }
 
-    /* ── VARIÁVEIS ── */
     :root {
       --green-deep:#1E3325; --green-dark:#2C4A32; --green-mid:#3D6B48;
       --cream:#F7F3ED; --cream-dark:#EDE8DF;
       --gold:#C9A96E; --gold-light:#E8D5A3; --gold-pale:#F5EDD8;
       --text:#1A1A1A; --text-mid:#4A4A4A; --text-light:#8A8A8A;
+      --nav-h:68px;
     }
 
-    /* ── APP WRAPPER ──
-       Ocupa 100% da tela, centraliza o conteúdo em telas largas.
-       Screens são empilhadas por display:none / display:block.
-    */
     #app {
-      width:100%;
-      max-width:430px;
-      margin:0 auto;
-      min-height:100vh;
-      position:relative;
-      background:var(--cream);
+      width:100%; max-width:430px; margin:0 auto;
+      min-height:100vh; position:relative; background:var(--cream);
+      overflow-x:hidden;
     }
 
-    /* ── SCREENS ──
-       Fluxo normal — sem position:absolute.
-       Apenas a screen ativa fica visível.
-    */
+    /* ── SCREENS ── */
     .screen { display:none; width:100%; }
     .screen.active { display:block; }
 
-    /* ══════════════════════════════
-       TELA DE ACESSO
-    ══════════════════════════════ */
-    #screen-access {
+    /* screens com nav bottom precisam de padding-bottom */
+    .has-nav { padding-bottom:var(--nav-h); }
+
+    /* screens fullscreen (acesso, conclusão) */
+    .fullscreen {
       min-height:100vh;
-      background:linear-gradient(160deg, #1E3325 0%, #2C4A32 55%, #3D6B48 100%);
-      display:flex !important;         /* override display:none quando active */
-      flex-direction:column;
-      align-items:center;
-      justify-content:center;
+      display:flex !important;
+      flex-direction:column; align-items:center; justify-content:center;
+      text-align:center;
+    }
+    .fullscreen.hidden-screen { display:none !important; }
+
+    /* ════════════════════════════
+       BOTTOM NAV
+    ════════════════════════════ */
+    #bottom-nav {
+      position:fixed; bottom:0; left:50%; transform:translateX(-50%);
+      width:100%; max-width:430px;
+      background:#fff; border-top:1px solid var(--cream-dark);
+      display:none; /* shown via JS when logged in */
+      height:var(--nav-h);
+      z-index:100;
+      padding-bottom:env(safe-area-inset-bottom);
+    }
+    #bottom-nav.visible { display:flex; }
+    .nav-tabs { display:flex; width:100%; height:100%; }
+    .nav-tab {
+      flex:1; display:flex; flex-direction:column; align-items:center;
+      justify-content:center; gap:3px; cursor:pointer; border:none;
+      background:transparent; padding:8px 4px;
+      color:var(--text-light); font-family:'Jost',sans-serif;
+      font-size:10px; letter-spacing:.5px; text-transform:uppercase;
+      font-weight:500; transition:color .2s;
+    }
+    .nav-tab.active { color:var(--green-dark); }
+    .nav-tab svg { width:22px; height:22px; }
+
+    /* ════════════════════════════
+       TELA DE ACESSO
+    ════════════════════════════ */
+    #screen-access {
+      background:linear-gradient(160deg,#1E3325 0%,#2C4A32 55%,#3D6B48 100%);
       padding:64px 28px 80px;
-      text-align:center;
     }
-    /* Atenção: quando hidden, voltamos para display:none */
-    #screen-access.hidden-screen { display:none !important; }
-
     .access-logo { margin-bottom:40px; }
-    .access-logo .brand {
-      display:block;
-      font-family:'Cormorant Garamond',serif;
-      font-size:48px;
-      font-weight:300;
-      letter-spacing:7px;
-      color:#F7F3ED;
-      line-height:1.1;
-    }
-    .access-logo .sep {
-      display:block;
-      font-family:'Cormorant Garamond',serif;
-      font-size:15px;
-      letter-spacing:6px;
-      color:#C9A96E;
-      margin:8px 0;
-    }
-    .access-logo .tagline {
-      display:block;
-      font-size:10px;
-      letter-spacing:3px;
-      color:rgba(247,243,237,.4);
-      margin-top:12px;
-    }
-
+    .access-logo .brand { display:block; font-family:'Cormorant Garamond',serif; font-size:48px; font-weight:300; letter-spacing:7px; color:#F7F3ED; line-height:1.1; }
+    .access-logo .sep { display:block; font-family:'Cormorant Garamond',serif; font-size:15px; letter-spacing:6px; color:#C9A96E; margin:8px 0; }
+    .access-logo .tagline { display:block; font-size:10px; letter-spacing:3px; color:rgba(247,243,237,.4); margin-top:12px; }
     .access-ornament { font-size:18px; color:#C9A96E; opacity:.5; margin-bottom:32px; }
-
-    .access-card {
-      width:100%;
-      background:rgba(255,255,255,.09);
-      border:1px solid rgba(255,255,255,.14);
-      border-radius:20px;
-      padding:28px 22px 24px;
-    }
-    .access-card h2 {
-      font-family:'Cormorant Garamond',serif;
-      font-size:22px;
-      font-weight:400;
-      color:#F7F3ED;
-      margin-bottom:8px;
-    }
-    .access-card .sub {
-      font-size:12px;
-      color:rgba(247,243,237,.45);
-      line-height:1.65;
-      margin-bottom:22px;
-    }
-    .token-input {
-      width:100%;
-      display:block;
-      background:rgba(255,255,255,.1);
-      border:1px solid rgba(255,255,255,.2);
-      border-radius:11px;
-      padding:15px 18px;
-      font-size:18px;
-      font-weight:500;
-      font-family:'Jost',sans-serif;
-      color:#F7F3ED;
-      letter-spacing:4px;
-      text-align:center;
-      text-transform:uppercase;
-      outline:none;
-      margin-bottom:12px;
-    }
+    .access-card { width:100%; background:rgba(255,255,255,.09); border:1px solid rgba(255,255,255,.14); border-radius:20px; padding:28px 22px 24px; }
+    .access-card h2 { font-family:'Cormorant Garamond',serif; font-size:22px; font-weight:400; color:#F7F3ED; margin-bottom:8px; }
+    .access-card .sub { font-size:12px; color:rgba(247,243,237,.45); line-height:1.65; margin-bottom:22px; }
+    .token-input { width:100%; display:block; background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.2); border-radius:11px; padding:15px 18px; font-size:18px; font-weight:500; font-family:'Jost',sans-serif; color:#F7F3ED; letter-spacing:4px; text-align:center; text-transform:uppercase; outline:none; margin-bottom:12px; }
     .token-input::placeholder { color:rgba(247,243,237,.22); letter-spacing:2px; font-size:13px; }
     .token-input:focus { border-color:#C9A96E; }
-
-    .btn-access {
-      width:100%;
-      display:block;
-      background:#C9A96E;
-      color:#2C4A32;
-      border:none;
-      border-radius:12px;
-      padding:16px;
-      font-family:'Jost',sans-serif;
-      font-size:13px;
-      font-weight:600;
-      letter-spacing:2px;
-      text-transform:uppercase;
-      cursor:pointer;
-    }
+    .btn-access { width:100%; display:block; background:#C9A96E; color:#2C4A32; border:none; border-radius:12px; padding:16px; font-family:'Jost',sans-serif; font-size:13px; font-weight:600; letter-spacing:2px; text-transform:uppercase; cursor:pointer; }
     .btn-access:disabled { opacity:.6; }
-
-    .access-error {
-      display:none;
-      color:#FFB3B3;
-      font-size:12px;
-      margin-top:10px;
-    }
+    .access-error { display:none; color:#FFB3B3; font-size:12px; margin-top:10px; }
     .demo-hint { font-size:11px; color:rgba(247,243,237,.28); margin-top:12px; }
     .demo-hint b { color:rgba(201,169,110,.6); font-weight:500; }
 
-    /* ══════════════════════════════
-       SHARED
-    ══════════════════════════════ */
-    .btn-primary {
-      display:block; width:100%;
-      background:var(--gold); color:var(--green-dark);
-      border:none; border-radius:13px; padding:16px;
-      font-family:'Jost',sans-serif; font-size:13px;
-      font-weight:600; letter-spacing:1.8px; text-transform:uppercase;
-      cursor:pointer;
-    }
-    .btn-outline {
-      display:block; width:100%;
-      background:transparent; color:var(--green-dark);
-      border:1.5px solid var(--green-dark); border-radius:13px; padding:14px;
-      font-family:'Jost',sans-serif; font-size:13px;
-      font-weight:500; letter-spacing:1px; cursor:pointer; margin-bottom:10px;
-    }
-    .back-btn {
-      position:absolute; top:52px; left:18px;
-      background:rgba(255,255,255,.12); border:none; border-radius:10px;
-      width:38px; height:38px; display:flex; align-items:center; justify-content:center;
-      cursor:pointer; color:var(--cream); font-size:20px; z-index:10;
-    }
+    /* ════════════════════════════
+       SHARED COMPONENTS
+    ════════════════════════════ */
+    .btn-primary { display:block; width:100%; background:var(--gold); color:var(--green-dark); border:none; border-radius:13px; padding:16px; font-family:'Jost',sans-serif; font-size:13px; font-weight:600; letter-spacing:1.8px; text-transform:uppercase; cursor:pointer; }
+    .btn-outline { display:block; width:100%; background:transparent; color:var(--green-dark); border:1.5px solid var(--green-dark); border-radius:13px; padding:14px; font-family:'Jost',sans-serif; font-size:13px; font-weight:500; letter-spacing:1px; cursor:pointer; margin-bottom:10px; }
+    .back-btn { position:absolute; top:52px; left:18px; background:rgba(255,255,255,.12); border:none; border-radius:10px; width:38px; height:38px; display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--cream); font-size:20px; z-index:10; }
+    .back-btn-dark { position:absolute; top:52px; left:18px; background:rgba(44,74,50,.08); border:none; border-radius:10px; width:38px; height:38px; display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--green-dark); font-size:20px; z-index:10; }
 
-    /* ══════════════════════════════
-       HOME
-    ══════════════════════════════ */
-    #screen-home { padding-bottom:80px; }
+    /* ════════════════════════════
+       DASHBOARD (INÍCIO)
+    ════════════════════════════ */
+    #screen-inicio { background:var(--cream); }
 
-    .home-header { background:var(--green-dark); padding:52px 20px 22px; }
-    .home-header-top { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:16px; }
-    .home-greeting { font-family:'Cormorant Garamond',serif; font-size:28px; font-weight:300; color:var(--cream); line-height:1.2; }
-    .home-greeting span { color:var(--gold); }
+    .dash-header {
+      background:linear-gradient(150deg,#1E3325,#2C4A32);
+      padding:52px 20px 28px;
+    }
+    .dash-greeting { font-family:'Cormorant Garamond',serif; font-size:13px; font-weight:300; color:rgba(247,243,237,.5); letter-spacing:1px; margin-bottom:4px; text-transform:uppercase; }
+    .dash-title { font-family:'Cormorant Garamond',serif; font-size:30px; font-weight:300; color:var(--cream); line-height:1.15; margin-bottom:20px; }
+    .dash-title span { color:var(--gold); }
+
+    .dash-stats { display:flex; gap:10px; }
+    .dash-stat { flex:1; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.1); border-radius:13px; padding:12px; text-align:center; }
+    .dash-stat-num { font-size:22px; font-weight:600; color:var(--gold); line-height:1; }
+    .dash-stat-lbl { font-size:9px; letter-spacing:1.5px; color:rgba(247,243,237,.45); margin-top:3px; text-transform:uppercase; }
+
+    .dash-body { padding:16px 14px; }
+
+    /* Cartão do dia atual */
+    .today-card {
+      background:linear-gradient(135deg,#2C4A32,#3D6B48);
+      border-radius:18px; padding:22px 20px; margin-bottom:14px;
+      cursor:pointer; position:relative; overflow:hidden;
+    }
+    .today-card::after { content:''; position:absolute; right:-20px; top:-20px; width:120px; height:120px; border-radius:50%; background:rgba(201,169,110,.07); }
+    .today-label { font-size:10px; letter-spacing:2.5px; color:rgba(201,169,110,.7); text-transform:uppercase; margin-bottom:8px; }
+    .today-day-num { font-family:'Cormorant Garamond',serif; font-size:42px; font-weight:300; color:var(--cream); line-height:1; margin-bottom:4px; }
+    .today-day-title { font-size:15px; font-weight:500; color:rgba(247,243,237,.8); margin-bottom:14px; }
+    .today-cta { display:inline-flex; align-items:center; gap:6px; background:var(--gold); color:var(--green-dark); border-radius:20px; padding:8px 16px; font-size:11px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; }
+
+    /* Progresso mini */
+    .dash-progress-card { background:#fff; border-radius:15px; padding:16px 18px; margin-bottom:14px; box-shadow:0 2px 8px rgba(44,74,50,.06); }
+    .dash-progress-label { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+    .dash-progress-label span { font-size:12px; font-weight:500; color:var(--text-mid); }
+    .dash-progress-label strong { font-size:12px; color:var(--green-dark); }
+    .progress-bar-wrap { background:var(--cream-dark); border-radius:8px; height:6px; }
+    .progress-bar-fill { background:linear-gradient(90deg,var(--green-dark),var(--gold)); height:6px; border-radius:8px; transition:width .5s ease; }
+    .dash-phases { display:flex; gap:6px; margin-top:10px; }
+    .dash-phase { flex:1; background:var(--cream-dark); border-radius:8px; padding:7px; text-align:center; }
+    .dash-phase.done { background:var(--gold-pale); }
+    .dash-phase.partial { background:rgba(44,74,50,.06); border:1px solid rgba(44,74,50,.12); }
+    .dash-phase-name { font-size:9px; letter-spacing:1px; color:var(--text-light); text-transform:uppercase; display:block; margin-bottom:2px; }
+    .dash-phase-count { font-size:13px; font-weight:600; color:var(--green-dark); }
+
+    /* Frase do dia */
+    .quote-card { background:var(--green-deep); border-radius:15px; padding:20px 18px; margin-bottom:14px; }
+    .quote-text { font-family:'Cormorant Garamond',serif; font-size:18px; font-weight:300; color:var(--cream); line-height:1.5; font-style:italic; margin-bottom:8px; }
+    .quote-src { font-size:10px; letter-spacing:2px; color:rgba(201,169,110,.6); text-transform:uppercase; }
+
+    /* Biblioteca quick access */
+    .biblioteca-card { background:#fff; border-radius:15px; padding:16px 18px; box-shadow:0 2px 8px rgba(44,74,50,.06); cursor:pointer; display:flex; align-items:center; gap:14px; }
+    .biblioteca-icon { width:44px; height:44px; border-radius:12px; background:var(--gold-pale); display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0; }
+    .biblioteca-info strong { display:block; font-size:14px; font-weight:500; color:var(--text); margin-bottom:3px; }
+    .biblioteca-info span { font-size:11px; color:var(--text-light); }
+    .biblioteca-arrow { margin-left:auto; font-size:18px; color:var(--text-light); flex-shrink:0; }
+
+    /* ════════════════════════════
+       JORNADA (mapa 21 dias)
+    ════════════════════════════ */
+    #screen-jornada { background:var(--cream); }
+    .jornada-header { background:var(--green-dark); padding:52px 20px 22px; }
+    .jornada-header-top { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:16px; }
+    .jornada-greeting { font-family:'Cormorant Garamond',serif; font-size:28px; font-weight:300; color:var(--cream); line-height:1.2; }
+    .jornada-greeting span { color:var(--gold); }
     .streak-badge { background:rgba(201,169,110,.14); border:1px solid rgba(201,169,110,.28); border-radius:10px; padding:6px 12px; text-align:center; }
     .streak-badge .num { display:block; font-size:20px; font-weight:600; color:var(--gold); line-height:1; }
     .streak-badge .lbl { font-size:9px; letter-spacing:1.5px; color:rgba(201,169,110,.65); }
-    .progress-bar-wrap { background:rgba(255,255,255,.1); border-radius:8px; height:5px; margin-bottom:6px; }
-    .progress-bar-fill { background:var(--gold); height:5px; border-radius:8px; }
-    .progress-label { font-size:11px; color:rgba(247,243,237,.5); letter-spacing:.5px; }
-
-    .home-body { padding:18px 14px; }
+    .jornada-body { padding:18px 14px; }
     .phase-section { margin-bottom:22px; }
     .phase-header { display:flex; align-items:center; gap:10px; padding:10px 14px; background:var(--cream-dark); border-radius:12px; margin-bottom:10px; }
     .phase-emoji { font-size:16px; }
     .phase-name { font-size:11px; font-weight:600; letter-spacing:1.5px; color:var(--green-dark); text-transform:uppercase; }
     .phase-sub { font-size:11px; color:var(--text-light); margin-left:auto; }
-
     .day-card { display:flex; align-items:center; background:#fff; border-radius:13px; padding:13px 15px; margin-bottom:8px; box-shadow:0 2px 8px rgba(44,74,50,.06); cursor:pointer; border:1.5px solid transparent; }
     .day-card.done { border-color:rgba(201,169,110,.3); background:#fffdf8; }
     .day-card.locked { opacity:.42; cursor:default; }
@@ -216,10 +191,97 @@
     .day-sub { font-size:11px; color:var(--text-light); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
     .day-check { font-size:16px; margin-left:8px; flex-shrink:0; }
 
-    /* ══════════════════════════════
-       DIA
-    ══════════════════════════════ */
-    #screen-day { padding-bottom:100px; }
+    /* ════════════════════════════
+       PROGRESSO
+    ════════════════════════════ */
+    #screen-progresso { background:var(--cream); }
+    .prog-header { background:linear-gradient(150deg,#1E3325,#2C4A32); padding:52px 20px 28px; }
+    .prog-header-title { font-family:'Cormorant Garamond',serif; font-size:28px; font-weight:300; color:var(--cream); margin-bottom:4px; }
+    .prog-header-sub { font-size:10px; letter-spacing:2px; color:rgba(247,243,237,.4); text-transform:uppercase; }
+    .prog-body { padding:16px 14px; }
+
+    .prog-ring-wrap { display:flex; align-items:center; justify-content:center; padding:24px 0 18px; }
+    .prog-ring { position:relative; width:140px; height:140px; }
+    .prog-ring svg { transform:rotate(-90deg); }
+    .prog-ring-label { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+    .prog-ring-num { font-size:36px; font-weight:600; color:var(--green-dark); line-height:1; }
+    .prog-ring-of { font-size:11px; color:var(--text-light); margin-top:2px; }
+
+    .prog-stats-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px; }
+    .prog-stat-card { background:#fff; border-radius:14px; padding:16px; box-shadow:0 2px 8px rgba(44,74,50,.06); text-align:center; }
+    .prog-stat-num { font-size:28px; font-weight:600; color:var(--green-dark); line-height:1; }
+    .prog-stat-lbl { font-size:10px; letter-spacing:1px; color:var(--text-light); text-transform:uppercase; margin-top:4px; }
+
+    .prog-phase-card { background:#fff; border-radius:15px; padding:16px 18px; margin-bottom:10px; box-shadow:0 2px 8px rgba(44,74,50,.06); }
+    .prog-phase-top { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+    .prog-phase-emoji { font-size:20px; }
+    .prog-phase-name { font-size:13px; font-weight:500; color:var(--text); }
+    .prog-phase-count { margin-left:auto; font-size:12px; color:var(--text-light); }
+    .prog-phase-bar { background:var(--cream-dark); border-radius:6px; height:5px; }
+    .prog-phase-fill { height:5px; border-radius:6px; }
+    .fill-p1 { background:linear-gradient(90deg,#2C4A32,#3D6B48); }
+    .fill-p2 { background:linear-gradient(90deg,#2C3A4A,#3A5A6A); }
+    .fill-p3 { background:linear-gradient(90deg,#6B5A3D,var(--gold)); }
+
+    .prog-completed-list { background:#fff; border-radius:15px; padding:16px 18px; box-shadow:0 2px 8px rgba(44,74,50,.06); }
+    .prog-completed-title { font-size:12px; font-weight:600; letter-spacing:1.5px; color:var(--green-dark); text-transform:uppercase; margin-bottom:14px; }
+    .prog-completed-item { display:flex; align-items:center; gap:12px; padding:10px 0; border-bottom:1px solid var(--cream-dark); }
+    .prog-completed-item:last-child { border-bottom:none; }
+    .prog-completed-check { width:28px; height:28px; border-radius:50%; background:var(--gold-pale); display:flex; align-items:center; justify-content:center; font-size:12px; flex-shrink:0; }
+    .prog-completed-name { font-size:13px; color:var(--text); }
+    .prog-completed-day { font-size:11px; color:var(--text-light); margin-left:auto; }
+    .prog-empty { text-align:center; padding:30px 0; color:var(--text-light); font-size:13px; }
+
+    /* ════════════════════════════
+       BIBLIOTECA
+    ════════════════════════════ */
+    #screen-biblioteca { background:var(--cream); }
+    .bib-header { background:linear-gradient(150deg,#1E3325,#2C4A32); padding:52px 20px 28px; position:relative; }
+    .bib-header-title { font-family:'Cormorant Garamond',serif; font-size:28px; font-weight:300; color:var(--cream); margin-bottom:4px; }
+    .bib-header-sub { font-size:10px; letter-spacing:2px; color:rgba(247,243,237,.4); text-transform:uppercase; }
+    .bib-body { padding:16px 14px; }
+    .bib-cat { margin-bottom:18px; }
+    .bib-cat-title { font-size:10px; font-weight:600; letter-spacing:2px; color:var(--green-dark); text-transform:uppercase; margin-bottom:10px; display:flex; align-items:center; gap:8px; }
+    .bib-cat-line { flex:1; height:1px; background:var(--cream-dark); }
+    .bib-item { background:#fff; border-radius:13px; padding:14px 16px; margin-bottom:8px; box-shadow:0 2px 8px rgba(44,74,50,.06); cursor:pointer; display:flex; align-items:center; gap:12px; }
+    .bib-item-icon { width:36px; height:36px; border-radius:10px; background:var(--gold-pale); display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0; }
+    .bib-item-title { font-size:14px; font-weight:500; color:var(--text); }
+    .bib-item-sub { font-size:11px; color:var(--text-light); margin-top:2px; }
+    .bib-item-day { font-size:10px; color:var(--gold); font-weight:600; margin-left:auto; flex-shrink:0; }
+
+    /* ════════════════════════════
+       PERFIL
+    ════════════════════════════ */
+    #screen-perfil { background:var(--cream); }
+    .perfil-header { background:linear-gradient(150deg,#1E3325,#2C4A32); padding:52px 20px 36px; text-align:center; }
+    .perfil-avatar { width:72px; height:72px; border-radius:50%; background:rgba(201,169,110,.15); border:1.5px solid rgba(201,169,110,.3); display:flex; align-items:center; justify-content:center; font-size:28px; margin:0 auto 14px; }
+    .perfil-name { font-family:'Cormorant Garamond',serif; font-size:22px; font-weight:300; color:var(--cream); margin-bottom:4px; }
+    .perfil-token { font-size:11px; letter-spacing:2px; color:rgba(201,169,110,.6); text-transform:uppercase; }
+    .perfil-body { padding:16px 14px; }
+    .perfil-section { background:#fff; border-radius:15px; margin-bottom:12px; box-shadow:0 2px 8px rgba(44,74,50,.06); overflow:hidden; }
+    .perfil-row { display:flex; align-items:center; gap:14px; padding:16px 18px; border-bottom:1px solid var(--cream-dark); cursor:default; }
+    .perfil-row:last-child { border-bottom:none; }
+    .perfil-row.clickable { cursor:pointer; }
+    .perfil-row.clickable:active { background:var(--cream-dark); }
+    .perfil-row-icon { font-size:18px; width:24px; text-align:center; flex-shrink:0; }
+    .perfil-row-label { font-size:14px; color:var(--text); }
+    .perfil-row-value { margin-left:auto; font-size:13px; color:var(--text-light); }
+    .perfil-row-arrow { margin-left:auto; font-size:16px; color:var(--text-light); }
+    .perfil-danger { color:#D64545; }
+
+    /* modal de confirmação */
+    .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:200; display:flex; align-items:flex-end; justify-content:center; }
+    .modal-overlay.hidden { display:none; }
+    .modal-sheet { background:#fff; border-radius:20px 20px 0 0; padding:28px 22px 40px; width:100%; max-width:430px; }
+    .modal-title { font-size:18px; font-weight:600; color:var(--text); margin-bottom:8px; }
+    .modal-sub { font-size:13px; color:var(--text-light); line-height:1.6; margin-bottom:24px; }
+    .modal-btn-danger { display:block; width:100%; background:#D64545; color:#fff; border:none; border-radius:12px; padding:15px; font-family:'Jost',sans-serif; font-size:14px; font-weight:600; cursor:pointer; margin-bottom:10px; }
+    .modal-btn-cancel { display:block; width:100%; background:var(--cream-dark); color:var(--text); border:none; border-radius:12px; padding:15px; font-family:'Jost',sans-serif; font-size:14px; font-weight:500; cursor:pointer; }
+
+    /* ════════════════════════════
+       DIA (sub-screen)
+    ════════════════════════════ */
+    #screen-day { background:var(--cream); }
     .day-hero { padding:52px 20px 30px; position:relative; }
     .day-hero.p1 { background:linear-gradient(150deg,#1E3325,#2C4A32); }
     .day-hero.p2 { background:linear-gradient(150deg,#2C3A4A,#3A5A6A); }
@@ -236,10 +298,10 @@
     .day-example { background:var(--gold-pale); border-left:3px solid var(--gold); border-radius:0 10px 10px 0; padding:13px 15px; font-size:13px; color:var(--text-mid); line-height:1.65; font-style:italic; }
     .day-actions { padding:0 16px 20px; display:flex; flex-direction:column; gap:10px; }
 
-    /* ══════════════════════════════
-       PLANNER
-    ══════════════════════════════ */
-    #screen-planner { padding-bottom:100px; }
+    /* ════════════════════════════
+       PLANNER (sub-screen)
+    ════════════════════════════ */
+    #screen-planner { background:var(--cream); }
     .planner-hero { padding:52px 20px 26px; background:linear-gradient(150deg,#1E3325,#2C4A32); position:relative; }
     .planner-hero-title { font-family:'Cormorant Garamond',serif; font-size:26px; font-weight:300; color:var(--cream); margin-bottom:4px; }
     .planner-hero-sub { font-size:10px; letter-spacing:1.5px; color:rgba(247,243,237,.45); text-transform:uppercase; }
@@ -259,20 +321,12 @@
     .refl-label { display:block; font-size:11px; color:var(--text-light); margin-bottom:5px; }
     .save-cta { padding:4px 14px 20px; }
 
-    /* ══════════════════════════════
-       CONCLUSÃO
-    ══════════════════════════════ */
+    /* ════════════════════════════
+       CONCLUSÃO (sub-screen)
+    ════════════════════════════ */
     #screen-complete {
-      min-height:100vh;
       background:linear-gradient(160deg,#1E3325 0%,#2C4A32 60%,#3D6B48 100%);
-      display:flex !important;
-      flex-direction:column;
-      align-items:center;
-      justify-content:center;
-      text-align:center;
-      padding:60px 28px;
     }
-    #screen-complete.hidden-screen { display:none !important; }
     .complete-ring { width:90px; height:90px; border-radius:50%; border:1px solid rgba(201,169,110,.4); display:flex; align-items:center; justify-content:center; font-size:32px; color:var(--gold); margin-bottom:24px; }
     .complete-day-label { font-size:10px; letter-spacing:3px; color:rgba(201,169,110,.65); text-transform:uppercase; margin-bottom:10px; }
     .complete-title { font-family:'Cormorant Garamond',serif; font-size:40px; font-weight:300; color:var(--cream); line-height:1.15; margin-bottom:18px; }
@@ -280,10 +334,10 @@
     .complete-next { font-size:12px; color:rgba(247,243,237,.38); margin-bottom:32px; }
     .complete-btn { background:var(--gold); color:var(--green-dark); border:none; border-radius:13px; padding:16px 36px; font-family:'Jost',sans-serif; font-size:13px; font-weight:600; letter-spacing:2px; text-transform:uppercase; cursor:pointer; }
 
-    /* ══════════════════════════════
+    /* ════════════════════════════
        TOAST
-    ══════════════════════════════ */
-    .toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(16px); background:var(--green-dark); color:var(--cream); padding:11px 22px; border-radius:30px; font-size:13px; opacity:0; transition:all .3s; pointer-events:none; z-index:999; white-space:nowrap; }
+    ════════════════════════════ */
+    .toast { position:fixed; bottom:calc(var(--nav-h) + 12px); left:50%; transform:translateX(-50%) translateY(16px); background:var(--green-dark); color:var(--cream); padding:11px 22px; border-radius:30px; font-size:13px; opacity:0; transition:all .3s; pointer-events:none; z-index:150; white-space:nowrap; }
     .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
 
     ::-webkit-scrollbar { display:none; }
@@ -293,7 +347,7 @@
 <div id="app">
 
   <!-- ── ACESSO ── -->
-  <div id="screen-access" class="screen active">
+  <div id="screen-access" class="screen active fullscreen">
     <div class="access-logo">
       <span class="brand">RESPIRE</span>
       <span class="sep">— e —</span>
@@ -312,60 +366,123 @@
     </div>
   </div>
 
-  <!-- ── HOME ── -->
-  <div id="screen-home" class="screen"></div>
+  <!-- ── INÍCIO (Dashboard) ── -->
+  <div id="screen-inicio" class="screen has-nav"></div>
 
-  <!-- ── DIA ── -->
+  <!-- ── JORNADA (21 dias) ── -->
+  <div id="screen-jornada" class="screen has-nav"></div>
+
+  <!-- ── PROGRESSO ── -->
+  <div id="screen-progresso" class="screen has-nav"></div>
+
+  <!-- ── BIBLIOTECA ── -->
+  <div id="screen-biblioteca" class="screen"></div>
+
+  <!-- ── PERFIL ── -->
+  <div id="screen-perfil" class="screen has-nav"></div>
+
+  <!-- ── DIA (sub) ── -->
   <div id="screen-day" class="screen"></div>
 
-  <!-- ── PLANNER ── -->
+  <!-- ── PLANNER (sub) ── -->
   <div id="screen-planner" class="screen"></div>
 
-  <!-- ── CONCLUSÃO ── -->
-  <div id="screen-complete" class="screen"></div>
+  <!-- ── CONCLUSÃO (sub) ── -->
+  <div id="screen-complete" class="screen fullscreen"></div>
 
 </div>
+
+<!-- BOTTOM NAV -->
+<nav id="bottom-nav">
+  <div class="nav-tabs">
+    <button class="nav-tab active" id="tab-inicio" onclick="navTo('inicio')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+        <path d="M3 12L12 3l9 9"/><path d="M9 21V12h6v9"/>
+      </svg>
+      Início
+    </button>
+    <button class="nav-tab" id="tab-jornada" onclick="navTo('jornada')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+        <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>
+      </svg>
+      Jornada
+    </button>
+    <button class="nav-tab" id="tab-progresso" onclick="navTo('progresso')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+      Progresso
+    </button>
+    <button class="nav-tab" id="tab-perfil" onclick="navTo('perfil')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+        <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+      </svg>
+      Perfil
+    </button>
+  </div>
+</nav>
+
+<!-- MODAL RESET -->
+<div class="modal-overlay hidden" id="modalReset">
+  <div class="modal-sheet">
+    <div class="modal-title">Resetar progresso?</div>
+    <p class="modal-sub">Isso apagará todos os seus dias concluídos e anotações do planner. Essa ação não pode ser desfeita.</p>
+    <button class="modal-btn-danger" onclick="confirmReset()">SIM, RESETAR TUDO</button>
+    <button class="modal-btn-cancel" onclick="closeModal()">Cancelar</button>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
-/* ══════════════════════════
+/* ═══════════════════════════
    DADOS
-══════════════════════════ */
+═══════════════════════════ */
 const PHASES = [
   {id:1,label:'SEMANA 1',name:'O Detox Mental',sub:'Limpando o Terreno',emoji:'🌱',color:'p1'},
   {id:2,label:'SEMANA 2',name:'Reprogramação Mental',sub:'Assumindo o Comando',emoji:'⚡',color:'p2'},
   {id:3,label:'SEMANA 3',name:'Domínio e Prosperidade',sub:'Consolidando a Blindagem',emoji:'✨',color:'p3'}
 ];
 const DAYS = [
-  {id:1,semana:1,titulo:'Pausa Consciente',proposito:'Interromper o fluxo de reatividade e desligar o modo de sobrevivência do cérebro.',exemplo:'Você está em meio a e-mails urgentes e sente a respiração encurtar. Em vez de continuar, você para.',acao:'Escolha 3 momentos do dia para parar 1 minuto.\n\nRespire. Feche os olhos. Ouça seu corpo.\n\nPode ser antes do café, no banheiro ou no carro.',planner:'Registre seu estado emocional antes e depois da pausa.',quote:'A pausa é onde a clareza nasce.'},
-  {id:2,semana:1,titulo:'Mapa da Mente',proposito:'Identificar os padrões de pensamento que drenam sua energia.',exemplo:'Você percebe que fica ruminando sobre o mesmo problema às 14h todos os dias.',acao:'Escreva sem filtro por 10 minutos.\n\nTudo que está na sua cabeça: medos, listas, preocupações.\n\nDepois, circule o que está em seu controle.',planner:'O que você descobriu sobre seus padrões de pensamento?',quote:'Nomear o medo é o primeiro passo para dissolvê-lo.'},
-  {id:3,semana:1,titulo:'Âncora do Presente',proposito:'Treinar o cérebro para retornar ao momento atual quando a ansiedade chega.',exemplo:'Sua mente viaja para uma reunião de amanhã. Você usa os 5 sentidos para voltar ao agora.',acao:'Pratique o método 5-4-3-2-1:\n5 coisas que você vê\n4 que pode tocar\n3 que ouve\n2 que cheira\n1 que sente.\n\nRepita sempre que a ansiedade aparecer.',planner:'Em que situação você precisou usar sua âncora hoje?',quote:'O presente é o único lugar onde a vida acontece.'},
-  {id:4,semana:1,titulo:'Desintoxicação Digital',proposito:'Reduzir o bombardeio de informações que mantém o sistema nervoso em alerta.',exemplo:'Você percebe que checa o celular 40x por hora sem motivo.',acao:'Estabeleça 3 janelas sem celular hoje (mínimo 30 min cada).\n\nDesative notificações de redes sociais.\n\nAntes de dormir: celular fora do quarto.',planner:'Como se sentiu nos momentos sem o celular?',quote:'Silêncio digital é luxo no século XXI.'},
-  {id:5,semana:1,titulo:'Movimento Intencional',proposito:'Usar o corpo como ferramenta para regular o sistema nervoso.',exemplo:'Em vez de mais uma hora na cadeira, você faz 10 minutos de movimento consciente.',acao:'Escolha um movimento que traga prazer — caminhar, dançar, alongar.\n\nMínimo 20 minutos, com atenção plena no seu corpo.\n\nSem podcast. Só você e o movimento.',planner:'Que sensação o movimento trouxe para o seu dia?',quote:'O corpo guarda a conta do que a mente ignora.'},
-  {id:6,semana:1,titulo:'Gratidão Estratégica',proposito:'Redirecionar o foco do cérebro do que falta para o que existe.',exemplo:'Você treina o cérebro a perceber evidências de abundância mesmo em dias difíceis.',acao:'Escreva 3 evidências de progresso de hoje — pequenas vitórias.\n\nDepois, 1 pessoa que você é grata por ter na vida e por quê.',planner:'Quais foram suas 3 evidências de progresso hoje?',quote:'A gratidão não nega a dor — ela expande a perspectiva.'},
-  {id:7,semana:1,titulo:'Revisão da Semana',proposito:'Consolidar os aprendizados da primeira semana e celebrar cada avanço.',exemplo:'Você percebe que já respira diferente antes de reagir.',acao:'Reserve 20 minutos de silêncio.\n\nReleia suas anotações dos últimos 6 dias.\n\nResponda: O que mudou em mim esta semana?\n\nCelebre sem minimizar.',planner:'Qual foi a maior mudança que você percebeu em si esta semana?',quote:'Cada passo pequeno é uma revolução silenciosa.'},
-  {id:8,semana:2,titulo:'Identidade Interna',proposito:'Separar quem você é de como você se sente — a base da estabilidade emocional.',exemplo:'Você sente ansiedade mas não é ansiosa. Você sente medo mas não é o medo.',acao:'Escreva 10 frases que começam com "Eu sou" — sem usar estados emocionais.\n\nFoco em valores, capacidades e características permanentes.',planner:'Quais afirmações mais ressoaram com quem você quer ser?',quote:'Você não é seus pensamentos. Você é quem os observa.'},
-  {id:9,semana:2,titulo:'Crenças Limitantes',proposito:'Identificar e questionar as narrativas automáticas que sabotam seu potencial.',exemplo:'"Não sou boa o suficiente" aparece toda vez que uma oportunidade surge.',acao:'Escreva 3 crenças limitantes que se repetem na sua cabeça.\n\nPara cada uma, pergunte: Isso é fato ou interpretação?\n\nEscreva a versão oposta como se fosse verdade.',planner:'Qual crença você descobriu que tem sabotado mais você?',quote:'A crença limita ou libera — você escolhe em qual acreditar.'},
-  {id:10,semana:2,titulo:'Gestão das Emoções',proposito:'Aprender a processar emoções difíceis sem suprimi-las nem ser controlada por elas.',exemplo:'Em vez de engolir a raiva ou explodir, você a nomeia e processa.',acao:'Quando uma emoção difícil surgir, siga o protocolo:\n1. Nomeie a emoção\n2. Localize no corpo\n3. Respire (4s inspira, 4s segura, 4s expira)\n4. Pergunte: o que ela quer me dizer?',planner:'Que emoção você processou diferente hoje?',quote:'Sentir é humano. Ser governado por elas é opcional.'},
-  {id:11,semana:2,titulo:'Comunicação Assertiva',proposito:'Expressar necessidades e limites com clareza, sem agressividade nem submissão.',exemplo:'Você aprende a dizer não sem culpa e sim sem ressentimento.',acao:'Identifique uma situação onde você costuma ceder por medo de desagradar.\n\nPratique dizer: "Não posso agora" ou apenas "Não, obrigada".\n\nPratica no espelho se precisar.',planner:'Em que situação você exercitou sua assertividade hoje?',quote:'Seu sim vale mais quando seu não é real.'},
-  {id:12,semana:2,titulo:'Foco Intencional',proposito:'Treinar a capacidade de concentração profunda em um mundo de distrações.',exemplo:'Você descobre que 2h de foco profundo valem mais que 8h fragmentadas.',acao:'Defina 1 tarefa mais importante do dia.\n\nBloqueie 90 minutos: celular no avião, notificações off.\n\nTrabalhe só nessa tarefa. Sem multitarefas.',planner:'Qual foi sua tarefa mais importante hoje?',quote:'A atenção é a moeda mais valiosa do século XXI.'},
-  {id:13,semana:2,titulo:'Rituais de Alta Performance',proposito:'Criar estrutura previsível que ancora o dia e reduz decisões que drenam energia.',exemplo:'Sua manhã de 30 minutos define o tom emocional do dia inteiro.',acao:'Desenhe seu ritual de manhã ideal em 30 minutos:\n- 5 min: silêncio ou respiração\n- 10 min: movimento\n- 10 min: leitura\n- 5 min: intenção do dia',planner:'Como seria seu ritual de manhã ideal?',quote:'Você não tem disciplina — você tem rituais.'},
-  {id:14,semana:2,titulo:'Revisão da Semana',proposito:'Integrar os avanços da reprogramação e preparar o terreno para o domínio.',exemplo:'Você percebe que reage diferente às situações que antes te desequilibravam.',acao:'Reserve 25 minutos.\n\nReleia suas anotações desta semana.\n\nEscreva uma carta curta para a versão passada de você.',planner:'O que você diria para a versão sua de 2 semanas atrás?',quote:'A transformação não é evento — é processo diário.'},
-  {id:15,semana:3,titulo:'Visão Clara',proposito:'Definir com precisão onde você quer chegar para que o cérebro crie o caminho.',exemplo:'Você para de agir por reação e começa a agir por intenção.',acao:'Escreva como é sua vida daqui a 1 ano nesse caminho.\n\nDetalhe: como você se sente, o que conquistou, como são seus relacionamentos.\n\nEscreva no presente, como se já fosse realidade.',planner:'Como é a versão sua de daqui a 1 ano?',quote:'Onde atenção vai, energia flui.'},
-  {id:16,semana:3,titulo:'Limpeza de Energia',proposito:'Identificar e eliminar o que drena sua energia sem entregar valor.',exemplo:'Você percebe que certas pessoas e compromissos custam mais do que entregam.',acao:'Faça duas listas:\nDRENA: o que gasta minha energia?\nNUTRE: o que me dá energia?\n\nEscolha 1 coisa para eliminar e 1 para ampliar esta semana.',planner:'O que você vai eliminar e o que vai ampliar?',quote:'Proteção de energia não é egoísmo — é sobrevivência.'},
-  {id:17,semana:3,titulo:'Relações Intencionais',proposito:'Investir em conexões que nutrem e criar distância das que drenam.',exemplo:'Você aprende a diferença entre presença e obrigação.',acao:'Identifique 3 pessoas que energizam você.\n\nEntre em contato com uma hoje — por escolha, não obrigação.\n\nIdentifique 1 relação que está te custando mais do que nutrindo.',planner:'Quem energiza você e quem drena?',quote:'Você é a média das 5 pessoas com quem mais convive.'},
-  {id:18,semana:3,titulo:'Prosperidade como Estado',proposito:'Entender que prosperidade é um estado interno antes de ser uma realidade externa.',exemplo:'Você percebe que abundância começa na forma como você pensa e age.',acao:'Escreva 5 formas em que você já é próspera hoje — não financeiramente, mas em vida.\n\nQual crença sobre dinheiro você herdou que te limita?\n\nReescreva ela.',planner:'Quais são suas 5 formas de prosperidade hoje?',quote:'Prosperidade é um conjunto de hábitos, não um destino.'},
-  {id:19,semana:3,titulo:'Ação Imperfecta',proposito:'Quebrar o ciclo da procrastinação e do perfeccionismo que paralisa o progresso.',exemplo:'Você entende que feito imperfeito bate planejado perfeito toda vez.',acao:'Identifique 1 coisa que você vem adiando por medo de não fazer certo.\n\nFaça hoje — da forma que conseguir.\n\nRegistre como foi dar esse passo.',planner:'O que você fez hoje apesar do medo ou da imperfeição?',quote:'Progresso, não perfeição.'},
-  {id:20,semana:3,titulo:'Sustentabilidade do Processo',proposito:'Criar sistemas que mantenham o progresso mesmo nos dias difíceis.',exemplo:'Você aprende que disciplina não é força de vontade — é estrutura.',acao:'Desenhe seu sistema de manutenção:\n- 1 hábito diário inegociável (5 min)\n- 1 revisão semanal (20 min)\n- 1 prática de recarga mensal',planner:'Qual é o seu sistema de manutenção?',quote:'O sistema bate a motivação todos os dias.'},
-  {id:21,semana:3,titulo:'Integração e Legado',proposito:'Celebrar a jornada completa e ancorar os aprendizados para o próximo capítulo.',exemplo:'Você reconhece que não é mais a mesma pessoa que começou há 21 dias.',acao:'Releia todas as suas anotações dos 21 dias.\n\nEscreva uma carta para a versão sua de daqui a 1 ano:\nO que você quer que ela saiba?\n\nCelebre. Você chegou.',planner:'O que a versão você de daqui 1 ano precisa saber sobre essa jornada?',quote:'Você não voltará ao que era. E isso é exatamente o ponto.'}
+  {id:1,semana:1,titulo:'Pausa Consciente',proposito:'Interromper o fluxo de reatividade e desligar o modo de sobrevivência do cérebro.',exemplo:'Você está em meio a e-mails urgentes e sente a respiração encurtar. Em vez de continuar, você para.',acao:'Escolha 3 momentos do dia para parar 1 minuto.\n\nRespire. Feche os olhos. Ouça seu corpo.\n\nPode ser antes do café, no banheiro ou no carro.',planner:'Registre seu estado emocional antes e depois da pausa.',quote:'A pausa é onde a clareza nasce.',tema:'respiracao'},
+  {id:2,semana:1,titulo:'Mapa da Mente',proposito:'Identificar os padrões de pensamento que drenam sua energia.',exemplo:'Você percebe que fica ruminando sobre o mesmo problema às 14h todos os dias.',acao:'Escreva sem filtro por 10 minutos.\n\nTudo que está na sua cabeça: medos, listas, preocupações.\n\nDepois, circule o que está em seu controle.',planner:'O que você descobriu sobre seus padrões de pensamento?',quote:'Nomear o medo é o primeiro passo para dissolvê-lo.',tema:'emocoes'},
+  {id:3,semana:1,titulo:'Âncora do Presente',proposito:'Treinar o cérebro para retornar ao momento atual quando a ansiedade chega.',exemplo:'Sua mente viaja para uma reunião de amanhã. Você usa os 5 sentidos para voltar ao agora.',acao:'Pratique o método 5-4-3-2-1:\n5 coisas que você vê\n4 que pode tocar\n3 que ouve\n2 que cheira\n1 que sente.\n\nRepita sempre que a ansiedade aparecer.',planner:'Em que situação você precisou usar sua âncora hoje?',quote:'O presente é o único lugar onde a vida acontece.',tema:'respiracao'},
+  {id:4,semana:1,titulo:'Desintoxicação Digital',proposito:'Reduzir o bombardeio de informações que mantém o sistema nervoso em alerta.',exemplo:'Você percebe que checa o celular 40x por hora sem motivo.',acao:'Estabeleça 3 janelas sem celular hoje (mínimo 30 min cada).\n\nDesative notificações de redes sociais.\n\nAntes de dormir: celular fora do quarto.',planner:'Como se sentiu nos momentos sem o celular?',quote:'Silêncio digital é luxo no século XXI.',tema:'foco'},
+  {id:5,semana:1,titulo:'Movimento Intencional',proposito:'Usar o corpo como ferramenta para regular o sistema nervoso.',exemplo:'Em vez de mais uma hora na cadeira, você faz 10 minutos de movimento consciente.',acao:'Escolha um movimento que traga prazer — caminhar, dançar, alongar.\n\nMínimo 20 minutos, com atenção plena no seu corpo.\n\nSem podcast. Só você e o movimento.',planner:'Que sensação o movimento trouxe para o seu dia?',quote:'O corpo guarda a conta do que a mente ignora.',tema:'respiracao'},
+  {id:6,semana:1,titulo:'Gratidão Estratégica',proposito:'Redirecionar o foco do cérebro do que falta para o que existe.',exemplo:'Você treina o cérebro a perceber evidências de abundância mesmo em dias difíceis.',acao:'Escreva 3 evidências de progresso de hoje — pequenas vitórias.\n\nDepois, 1 pessoa que você é grata por ter na vida e por quê.',planner:'Quais foram suas 3 evidências de progresso hoje?',quote:'A gratidão não nega a dor — ela expande a perspectiva.',tema:'gratidao'},
+  {id:7,semana:1,titulo:'Revisão da Semana',proposito:'Consolidar os aprendizados da primeira semana e celebrar cada avanço.',exemplo:'Você percebe que já respira diferente antes de reagir.',acao:'Reserve 20 minutos de silêncio.\n\nReleia suas anotações dos últimos 6 dias.\n\nResponda: O que mudou em mim esta semana?\n\nCelebre sem minimizar.',planner:'Qual foi a maior mudança que você percebeu em si esta semana?',quote:'Cada passo pequeno é uma revolução silenciosa.',tema:'gratidao'},
+  {id:8,semana:2,titulo:'Identidade Interna',proposito:'Separar quem você é de como você se sente — a base da estabilidade emocional.',exemplo:'Você sente ansiedade mas não é ansiosa. Você sente medo mas não é o medo.',acao:'Escreva 10 frases que começam com "Eu sou" — sem usar estados emocionais.\n\nFoco em valores, capacidades e características permanentes.',planner:'Quais afirmações mais ressoaram com quem você quer ser?',quote:'Você não é seus pensamentos. Você é quem os observa.',tema:'emocoes'},
+  {id:9,semana:2,titulo:'Crenças Limitantes',proposito:'Identificar e questionar as narrativas automáticas que sabotam seu potencial.',exemplo:'"Não sou boa o suficiente" aparece toda vez que uma oportunidade surge.',acao:'Escreva 3 crenças limitantes que se repetem na sua cabeça.\n\nPara cada uma, pergunte: Isso é fato ou interpretação?\n\nEscreva a versão oposta como se fosse verdade.',planner:'Qual crença você descobriu que tem sabotado mais você?',quote:'A crença limita ou libera — você escolhe em qual acreditar.',tema:'emocoes'},
+  {id:10,semana:2,titulo:'Gestão das Emoções',proposito:'Aprender a processar emoções difíceis sem suprimi-las nem ser controlada por elas.',exemplo:'Em vez de engolir a raiva ou explodir, você a nomeia e processa.',acao:'Quando uma emoção difícil surgir, siga o protocolo:\n1. Nomeie a emoção\n2. Localize no corpo\n3. Respire (4s inspira, 4s segura, 4s expira)\n4. Pergunte: o que ela quer me dizer?',planner:'Que emoção você processou diferente hoje?',quote:'Sentir é humano. Ser governado por elas é opcional.',tema:'emocoes'},
+  {id:11,semana:2,titulo:'Comunicação Assertiva',proposito:'Expressar necessidades e limites com clareza, sem agressividade nem submissão.',exemplo:'Você aprende a dizer não sem culpa e sim sem ressentimento.',acao:'Identifique uma situação onde você costuma ceder por medo de desagradar.\n\nPratique dizer: "Não posso agora" ou apenas "Não, obrigada".\n\nPratica no espelho se precisar.',planner:'Em que situação você exercitou sua assertividade hoje?',quote:'Seu sim vale mais quando seu não é real.',tema:'relacionamentos'},
+  {id:12,semana:2,titulo:'Foco Intencional',proposito:'Treinar a capacidade de concentração profunda em um mundo de distrações.',exemplo:'Você descobre que 2h de foco profundo valem mais que 8h fragmentadas.',acao:'Defina 1 tarefa mais importante do dia.\n\nBloqueie 90 minutos: celular no avião, notificações off.\n\nTrabalhe só nessa tarefa. Sem multitarefas.',planner:'Qual foi sua tarefa mais importante hoje?',quote:'A atenção é a moeda mais valiosa do século XXI.',tema:'foco'},
+  {id:13,semana:2,titulo:'Rituais de Alta Performance',proposito:'Criar estrutura previsível que ancora o dia e reduz decisões que drenam energia.',exemplo:'Sua manhã de 30 minutos define o tom emocional do dia inteiro.',acao:'Desenhe seu ritual de manhã ideal em 30 minutos:\n- 5 min: silêncio ou respiração\n- 10 min: movimento\n- 10 min: leitura\n- 5 min: intenção do dia',planner:'Como seria seu ritual de manhã ideal?',quote:'Você não tem disciplina — você tem rituais.',tema:'foco'},
+  {id:14,semana:2,titulo:'Revisão da Semana',proposito:'Integrar os avanços da reprogramação e preparar o terreno para o domínio.',exemplo:'Você percebe que reage diferente às situações que antes te desequilibravam.',acao:'Reserve 25 minutos.\n\nReleia suas anotações desta semana.\n\nEscreva uma carta curta para a versão passada de você.',planner:'O que você diria para a versão sua de 2 semanas atrás?',quote:'A transformação não é evento — é processo diário.',tema:'gratidao'},
+  {id:15,semana:3,titulo:'Visão Clara',proposito:'Definir com precisão onde você quer chegar para que o cérebro crie o caminho.',exemplo:'Você para de agir por reação e começa a agir por intenção.',acao:'Escreva como é sua vida daqui a 1 ano nesse caminho.\n\nDetalhe: como você se sente, o que conquistou, como são seus relacionamentos.\n\nEscreva no presente, como se já fosse realidade.',planner:'Como é a versão sua de daqui a 1 ano?',quote:'Onde atenção vai, energia flui.',tema:'prosperidade'},
+  {id:16,semana:3,titulo:'Limpeza de Energia',proposito:'Identificar e eliminar o que drena sua energia sem entregar valor.',exemplo:'Você percebe que certas pessoas e compromissos custam mais do que entregam.',acao:'Faça duas listas:\nDRENA: o que gasta minha energia?\nNUTRE: o que me dá energia?\n\nEscolha 1 coisa para eliminar e 1 para ampliar esta semana.',planner:'O que você vai eliminar e o que vai ampliar?',quote:'Proteção de energia não é egoísmo — é sobrevivência.',tema:'emocoes'},
+  {id:17,semana:3,titulo:'Relações Intencionais',proposito:'Investir em conexões que nutrem e criar distância das que drenam.',exemplo:'Você aprende a diferença entre presença e obrigação.',acao:'Identifique 3 pessoas que energizam você.\n\nEntre em contato com uma hoje — por escolha, não obrigação.\n\nIdentifique 1 relação que está te custando mais do que nutrindo.',planner:'Quem energiza você e quem drena?',quote:'Você é a média das 5 pessoas com quem mais convive.',tema:'relacionamentos'},
+  {id:18,semana:3,titulo:'Prosperidade como Estado',proposito:'Entender que prosperidade é um estado interno antes de ser uma realidade externa.',exemplo:'Você percebe que abundância começa na forma como você pensa e age.',acao:'Escreva 5 formas em que você já é próspera hoje — não financeiramente, mas em vida.\n\nQual crença sobre dinheiro você herdou que te limita?\n\nReescreva ela.',planner:'Quais são suas 5 formas de prosperidade hoje?',quote:'Prosperidade é um conjunto de hábitos, não um destino.',tema:'prosperidade'},
+  {id:19,semana:3,titulo:'Ação Imperfecta',proposito:'Quebrar o ciclo da procrastinação e do perfeccionismo que paralisa o progresso.',exemplo:'Você entende que feito imperfeito bate planejado perfeito toda vez.',acao:'Identifique 1 coisa que você vem adiando por medo de não fazer certo.\n\nFaça hoje — da forma que conseguir.\n\nRegistre como foi dar esse passo.',planner:'O que você fez hoje apesar do medo ou da imperfeição?',quote:'Progresso, não perfeição.',tema:'foco'},
+  {id:20,semana:3,titulo:'Sustentabilidade do Processo',proposito:'Criar sistemas que mantenham o progresso mesmo nos dias difíceis.',exemplo:'Você aprende que disciplina não é força de vontade — é estrutura.',acao:'Desenhe seu sistema de manutenção:\n- 1 hábito diário inegociável (5 min)\n- 1 revisão semanal (20 min)\n- 1 prática de recarga mensal',planner:'Qual é o seu sistema de manutenção?',quote:'O sistema bate a motivação todos os dias.',tema:'prosperidade'},
+  {id:21,semana:3,titulo:'Integração e Legado',proposito:'Celebrar a jornada completa e ancorar os aprendizados para o próximo capítulo.',exemplo:'Você reconhece que não é mais a mesma pessoa que começou há 21 dias.',acao:'Releia todas as suas anotações dos 21 dias.\n\nEscreva uma carta para a versão sua de daqui a 1 ano:\nO que você quer que ela saiba?\n\nCelebre. Você chegou.',planner:'O que a versão você de daqui 1 ano precisa saber sobre essa jornada?',quote:'Você não voltará ao que era. E isso é exatamente o ponto.',tema:'gratidao'}
 ];
 
-/* ══════════════════════════
+const BIBLIOTECA = [
+  {tema:'respiracao',label:'Respiração & Corpo',emoji:'🌬️',days:[1,3,5]},
+  {tema:'emocoes',label:'Emoções & Mente',emoji:'💭',days:[2,8,9,10,16]},
+  {tema:'foco',label:'Foco & Produtividade',emoji:'🎯',days:[4,12,13,19]},
+  {tema:'gratidao',label:'Gratidão & Revisão',emoji:'🌿',days:[6,7,14,21]},
+  {tema:'relacionamentos',label:'Relacionamentos',emoji:'🤝',days:[11,17]},
+  {tema:'prosperidade',label:'Prosperidade',emoji:'✨',days:[15,18,20]}
+];
+
+/* ═══════════════════════════
    ESTADO
-══════════════════════════ */
+═══════════════════════════ */
 const DEF = {token:null,currentDay:1,completedDays:[],streak:0,lastOpened:null,startDate:null,plannerEntries:{}};
 let S = {...DEF};
 let activeDay = null;
+let prevScreen = 'inicio'; // para voltar da biblioteca/dia
 
 function save(){ localStorage.setItem('rr3',JSON.stringify(S)); }
 function load(){
@@ -380,30 +497,38 @@ function updateStreak(){
   S.lastOpened=today; save();
 }
 
-/* ══════════════════════════
+/* ═══════════════════════════
    NAVEGAÇÃO
-   Usa classes active / hidden-screen em vez de position:absolute
-══════════════════════════ */
-const ALL_SCREENS = ['access','home','day','planner','complete'];
+═══════════════════════════ */
+const MAIN_TABS = ['inicio','jornada','progresso','perfil'];
+const ALL_SCREENS = ['access','inicio','jornada','progresso','perfil','biblioteca','day','planner','complete'];
 
 function show(id){
   ALL_SCREENS.forEach(s=>{
-    const el = document.getElementById('screen-'+s);
+    const el=document.getElementById('screen-'+s);
     if(!el) return;
-    if(s===id){
-      el.classList.add('active');
-      el.classList.remove('hidden-screen');
-    } else {
-      el.classList.remove('active');
-      el.classList.add('hidden-screen');
-    }
+    el.classList.toggle('active', s===id);
     el.scrollTop=0;
+  });
+  // bottom nav: visível só nas telas principais
+  const nav=document.getElementById('bottom-nav');
+  nav.classList.toggle('visible', MAIN_TABS.includes(id));
+}
+
+function navTo(id){
+  if(id==='inicio') renderInicio();
+  else if(id==='jornada') renderJornada();
+  else if(id==='progresso') renderProgresso();
+  else if(id==='perfil') renderPerfil();
+  show(id);
+  MAIN_TABS.forEach(t=>{
+    document.getElementById('tab-'+t)?.classList.toggle('active', t===id);
   });
 }
 
-/* ══════════════════════════
+/* ═══════════════════════════
    TOAST
-══════════════════════════ */
+═══════════════════════════ */
 let _tt;
 function toast(msg){
   const el=document.getElementById('toast');
@@ -411,9 +536,9 @@ function toast(msg){
   clearTimeout(_tt); _tt=setTimeout(()=>el.classList.remove('show'),2800);
 }
 
-/* ══════════════════════════
-   ACCESS
-══════════════════════════ */
+/* ═══════════════════════════
+   ACESSO
+═══════════════════════════ */
 document.getElementById('tokenInput').addEventListener('keydown', e=>{
   if(e.key==='Enter') handleAccess();
 });
@@ -422,24 +547,16 @@ async function handleAccess(){
   const val = document.getElementById('tokenInput').value.trim().toUpperCase();
   const err = document.getElementById('accessError');
   const btn = document.getElementById('btnAccess');
-
-  if(val.length < 6){
-    err.textContent='Código precisa ter ao menos 6 caracteres.';
-    err.style.display='block'; return;
-  }
-
+  if(val.length<6){ err.textContent='Código precisa ter ao menos 6 caracteres.'; err.style.display='block'; return; }
   btn.textContent='VERIFICANDO...'; btn.disabled=true; err.style.display='none';
-
   try {
-    const res = await fetch('/api/validate-token',{
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({token:val})
-    });
-    const data = await res.json();
+    const res=await fetch('/api/validate-token',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:val})});
+    const data=await res.json();
     if(data.valid){
       S.token=val;
       if(!S.startDate) S.startDate=new Date().toISOString();
-      updateStreak(); save(); renderHome(); show('home');
+      updateStreak(); save();
+      renderInicio(); navTo('inicio');
     } else {
       err.textContent='Código inválido. Verifique e tente novamente.';
       err.style.display='block';
@@ -452,19 +569,89 @@ async function handleAccess(){
   }
 }
 
-/* ══════════════════════════
-   HOME
-══════════════════════════ */
-function renderHome(){
+/* ═══════════════════════════
+   DASHBOARD (INÍCIO)
+═══════════════════════════ */
+function renderInicio(){
   const done=S.completedDays.length, pct=Math.round(done/21*100);
-  const el=document.getElementById('screen-home');
+  const todayD=DAYS.find(d=>d.id===S.currentDay)||DAYS[0];
+  const todayPh=PHASES.find(p=>p.id===todayD.semana);
+  const now=new Date();
+  const h=now.getHours();
+  const saud = h<12?'Bom dia':h<18?'Boa tarde':'Boa noite';
+  const dayName=['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'][now.getDay()];
+  const quote=DAYS[done>0?done-1:0]?.quote||DAYS[0].quote;
+
+  // progresso por fase
+  const phaseStats=PHASES.map(ph=>{
+    const total=7, comp=S.completedDays.filter(id=>DAYS.find(d=>d.id===id&&d.semana===ph.id)).length;
+    return {ph,comp,total};
+  });
+
+  document.getElementById('screen-inicio').innerHTML=`
+    <div class="dash-header">
+      <div class="dash-greeting">${saud} · ${dayName}</div>
+      <div class="dash-title">Sua jornada<br><span>de clareza</span></div>
+      <div class="dash-stats">
+        <div class="dash-stat"><div class="dash-stat-num">${S.streak||1}</div><div class="dash-stat-lbl">Sequência</div></div>
+        <div class="dash-stat"><div class="dash-stat-num">${done}</div><div class="dash-stat-lbl">Concluídos</div></div>
+        <div class="dash-stat"><div class="dash-stat-num">${21-done}</div><div class="dash-stat-lbl">Restantes</div></div>
+      </div>
+    </div>
+    <div class="dash-body">
+      ${done<21?`
+      <div class="today-card" onclick="openDay(${todayD.id})">
+        <div class="today-label">${todayPh.label} · Hoje</div>
+        <div class="today-day-num">${todayD.id}</div>
+        <div class="today-day-title">${todayD.titulo}</div>
+        <div class="today-cta">▶ ACESSAR DIA ${todayD.id}</div>
+      </div>`:`
+      <div class="today-card" style="cursor:default">
+        <div class="today-label">Jornada completa 🌿</div>
+        <div class="today-day-num">21</div>
+        <div class="today-day-title">Parabéns! Você completou os 21 dias.</div>
+      </div>`}
+
+      <div class="dash-progress-card">
+        <div class="dash-progress-label"><span>Progresso geral</span><strong>${done}/21 dias · ${pct}%</strong></div>
+        <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${pct}%"></div></div>
+        <div class="dash-phases">
+          ${phaseStats.map(({ph,comp,total})=>`
+            <div class="dash-phase ${comp===total?'done':comp>0?'partial':''}">
+              <span class="dash-phase-name">${ph.label}</span>
+              <span class="dash-phase-count">${comp}/${total}</span>
+            </div>`).join('')}
+        </div>
+      </div>
+
+      <div class="quote-card">
+        <div class="quote-text">"${quote}"</div>
+        <div class="quote-src">✦ Respire e Recomece</div>
+      </div>
+
+      <div class="biblioteca-card" onclick="openBiblioteca('inicio')">
+        <div class="biblioteca-icon">📚</div>
+        <div class="biblioteca-info">
+          <strong>Biblioteca de Práticas</strong>
+          <span>6 categorias · 21 práticas</span>
+        </div>
+        <div class="biblioteca-arrow">›</div>
+      </div>
+    </div>`;
+}
+
+/* ═══════════════════════════
+   JORNADA
+═══════════════════════════ */
+function renderJornada(){
+  const done=S.completedDays.length, pct=Math.round(done/21*100);
   const phasesHTML=PHASES.map(ph=>{
     const days=DAYS.filter(d=>d.semana===ph.id);
     const dHTML=days.map(d=>{
       const isDone=S.completedDays.includes(d.id);
       const isActive=d.id===S.currentDay;
       const isLocked=d.id>S.currentDay&&!isDone;
-      let cls='day-card'+(isDone?' done':'')+(isActive?' active-day':'')+(isLocked?' locked':'');
+      const cls='day-card'+(isDone?' done':'')+(isActive?' active-day':'')+(isLocked?' locked':'');
       const click=isLocked?'':` onclick="openDay(${d.id})"`;
       return `<div class="${cls}"${click}>
         <div class="day-num">${isDone?'✓':d.id}</div>
@@ -484,32 +671,218 @@ function renderHome(){
     </div>`;
   }).join('');
 
-  el.innerHTML=`
-    <div class="home-header">
-      <div class="home-header-top">
-        <div class="home-greeting">Sua jornada<br><span>de 21 dias</span></div>
-        <div class="streak-badge">
-          <span class="num">${S.streak||1}</span>
-          <span class="lbl">DIA${S.streak!==1?'S':''}</span>
-        </div>
+  document.getElementById('screen-jornada').innerHTML=`
+    <div class="jornada-header">
+      <div class="jornada-header-top">
+        <div class="jornada-greeting">Sua jornada<br><span>de 21 dias</span></div>
+        <div class="streak-badge"><span class="num">${S.streak||1}</span><span class="lbl">DIA${S.streak!==1?'S':''}</span></div>
       </div>
       <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${pct}%"></div></div>
-      <div class="progress-label">${done} de 21 completos · ${pct}%</div>
+      <div style="font-size:11px;color:rgba(247,243,237,.5);margin-top:5px">${done} de 21 concluídos · ${pct}%</div>
     </div>
-    <div class="home-body">${phasesHTML}</div>`;
+    <div class="jornada-body">${phasesHTML}</div>`;
 }
 
-/* ══════════════════════════
+/* ═══════════════════════════
+   PROGRESSO
+═══════════════════════════ */
+function renderProgresso(){
+  const done=S.completedDays.length, pct=Math.round(done/21*100);
+  const r=60, circ=2*Math.PI*r, dash=circ*(pct/100);
+  const streak=S.streak||1;
+  const started=S.startDate?new Date(S.startDate):null;
+  const diasDesde=started?Math.floor((Date.now()-started)/86400000)+1:1;
+
+  const phaseStats=PHASES.map(ph=>{
+    const total=7, comp=S.completedDays.filter(id=>DAYS.find(d=>d.id===id&&d.semana===ph.id)).length;
+    return {ph,comp,total,pct:Math.round(comp/total*100)};
+  });
+
+  const completedList=S.completedDays.slice().sort((a,b)=>a-b).map(id=>{
+    const d=DAYS.find(x=>x.id===id);
+    return d?`<div class="prog-completed-item">
+      <div class="prog-completed-check">🌿</div>
+      <div class="prog-completed-name">${d.titulo}</div>
+      <div class="prog-completed-day">Dia ${d.id}</div>
+    </div>`:'';
+  }).join('');
+
+  document.getElementById('screen-progresso').innerHTML=`
+    <div class="prog-header">
+      <div class="prog-header-title">Seu Progresso</div>
+      <div class="prog-header-sub">Jornada de 21 dias</div>
+    </div>
+    <div class="prog-body">
+      <div class="prog-ring-wrap">
+        <div class="prog-ring">
+          <svg width="140" height="140" viewBox="0 0 140 140">
+            <circle cx="70" cy="70" r="${r}" fill="none" stroke="${'var(--cream-dark)'}" stroke-width="10"/>
+            <circle cx="70" cy="70" r="${r}" fill="none" stroke="${'#2C4A32'}" stroke-width="10"
+              stroke-dasharray="${dash} ${circ}" stroke-linecap="round"/>
+          </svg>
+          <div class="prog-ring-label">
+            <div class="prog-ring-num">${done}</div>
+            <div class="prog-ring-of">de 21 dias</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="prog-stats-grid">
+        <div class="prog-stat-card"><div class="prog-stat-num">${pct}%</div><div class="prog-stat-lbl">Completo</div></div>
+        <div class="prog-stat-card"><div class="prog-stat-num">${streak}</div><div class="prog-stat-lbl">Sequência</div></div>
+        <div class="prog-stat-card"><div class="prog-stat-num">${21-done}</div><div class="prog-stat-lbl">Restantes</div></div>
+        <div class="prog-stat-card"><div class="prog-stat-num">${diasDesde}</div><div class="prog-stat-lbl">No app</div></div>
+      </div>
+
+      ${phaseStats.map(({ph,comp,total,pct:pp})=>`
+      <div class="prog-phase-card">
+        <div class="prog-phase-top">
+          <span class="prog-phase-emoji">${ph.emoji}</span>
+          <span class="prog-phase-name">${ph.label} · ${ph.name}</span>
+          <span class="prog-phase-count">${comp}/${total}</span>
+        </div>
+        <div class="prog-phase-bar"><div class="prog-phase-fill fill-p${ph.id}" style="width:${pp}%"></div></div>
+      </div>`).join('')}
+
+      <div class="prog-completed-list">
+        <div class="prog-completed-title">✦ Dias concluídos</div>
+        ${done===0?'<div class="prog-empty">Complete seu primeiro dia para ver aqui 🌿</div>':completedList}
+      </div>
+    </div>`;
+}
+
+/* ═══════════════════════════
+   BIBLIOTECA
+═══════════════════════════ */
+function openBiblioteca(from='inicio'){
+  prevScreen=from;
+  renderBiblioteca();
+  show('biblioteca');
+}
+
+function renderBiblioteca(){
+  const catsHTML=BIBLIOTECA.map(cat=>{
+    const items=cat.days.map(id=>{
+      const d=DAYS.find(x=>x.id===id);
+      const isDone=S.completedDays.includes(id);
+      return d?`<div class="bib-item" onclick="openDay(${d.id});prevScreen='biblioteca'">
+        <div class="bib-item-icon">${isDone?'✅':'📖'}</div>
+        <div>
+          <div class="bib-item-title">${d.titulo}</div>
+          <div class="bib-item-sub">${d.proposito.substring(0,48)}…</div>
+        </div>
+        <div class="bib-item-day">DIA ${d.id}</div>
+      </div>`:'';
+    }).join('');
+    return `<div class="bib-cat">
+      <div class="bib-cat-title">${cat.emoji} ${cat.label}<span class="bib-cat-line"></span></div>
+      ${items}
+    </div>`;
+  }).join('');
+
+  document.getElementById('screen-biblioteca').innerHTML=`
+    <div class="bib-header">
+      <button class="back-btn" onclick="navTo('${prevScreen}')">←</button>
+      <div class="bib-header-title">Biblioteca</div>
+      <div class="bib-header-sub">Práticas por categoria</div>
+    </div>
+    <div class="bib-body">${catsHTML}</div>`;
+}
+
+/* ═══════════════════════════
+   PERFIL
+═══════════════════════════ */
+function renderPerfil(){
+  const done=S.completedDays.length;
+  const started=S.startDate?new Date(S.startDate).toLocaleDateString('pt-BR'):'—';
+  document.getElementById('screen-perfil').innerHTML=`
+    <div class="perfil-header">
+      <div class="perfil-avatar">🌿</div>
+      <div class="perfil-name">Minha Jornada</div>
+      <div class="perfil-token">Código: ${S.token||'—'}</div>
+    </div>
+    <div class="perfil-body">
+      <div class="perfil-section">
+        <div class="perfil-row">
+          <div class="perfil-row-icon">📅</div>
+          <div class="perfil-row-label">Início da jornada</div>
+          <div class="perfil-row-value">${started}</div>
+        </div>
+        <div class="perfil-row">
+          <div class="perfil-row-icon">🌿</div>
+          <div class="perfil-row-label">Dias concluídos</div>
+          <div class="perfil-row-value">${done} de 21</div>
+        </div>
+        <div class="perfil-row">
+          <div class="perfil-row-icon">🔥</div>
+          <div class="perfil-row-label">Sequência atual</div>
+          <div class="perfil-row-value">${S.streak||1} dia${S.streak!==1?'s':''}</div>
+        </div>
+      </div>
+
+      <div class="perfil-section">
+        <div class="perfil-row clickable" onclick="openBiblioteca('perfil')">
+          <div class="perfil-row-icon">📚</div>
+          <div class="perfil-row-label">Biblioteca de práticas</div>
+          <div class="perfil-row-arrow">›</div>
+        </div>
+      </div>
+
+      <div class="perfil-section">
+        <div class="perfil-row clickable" onclick="openModal()">
+          <div class="perfil-row-icon">🔄</div>
+          <div class="perfil-row-label perfil-danger">Resetar progresso</div>
+          <div class="perfil-row-arrow">›</div>
+        </div>
+        <div class="perfil-row clickable" onclick="logout()">
+          <div class="perfil-row-icon">🚪</div>
+          <div class="perfil-row-label perfil-danger">Sair</div>
+          <div class="perfil-row-arrow">›</div>
+        </div>
+      </div>
+
+      <div style="text-align:center;padding:24px 0;font-size:11px;color:var(--text-light)">
+        Respire e Recomece · v1.0<br>
+        <span style="color:var(--gold)">✦</span> 21 dias · Clareza · Prosperidade
+      </div>
+    </div>`;
+}
+
+/* ═══════════════════════════
+   MODAL RESET
+═══════════════════════════ */
+function openModal(){ document.getElementById('modalReset').classList.remove('hidden'); }
+function closeModal(){ document.getElementById('modalReset').classList.add('hidden'); }
+function confirmReset(){
+  S={...DEF,token:S.token}; save(); closeModal();
+  toast('Progresso resetado 🌱');
+  renderInicio(); navTo('inicio');
+}
+function logout(){
+  S={...DEF}; save();
+  show('access');
+  document.getElementById('bottom-nav').classList.remove('visible');
+  document.getElementById('tokenInput').value='';
+  document.getElementById('accessError').style.display='none';
+  document.getElementById('btnAccess').textContent='ACESSAR MINHA JORNADA';
+  document.getElementById('btnAccess').disabled=false;
+}
+
+/* ═══════════════════════════
    DIA
-══════════════════════════ */
-function openDay(id){ activeDay=DAYS.find(d=>d.id===id); renderDay(); show('day'); }
+═══════════════════════════ */
+function openDay(id){
+  activeDay=DAYS.find(d=>d.id===id);
+  if(!activeDay) return;
+  renderDay(); show('day');
+}
 
 function renderDay(){
   const d=activeDay, ph=PHASES.find(p=>p.id===d.semana);
   const isDone=S.completedDays.includes(d.id);
   document.getElementById('screen-day').innerHTML=`
     <div class="day-hero ${ph.color}">
-      <button class="back-btn" onclick="goHome()">←</button>
+      <button class="back-btn" onclick="backFromDay()">←</button>
       <div class="day-hero-phase">${ph.label} · ${ph.name}</div>
       <div class="day-hero-num">DIA ${d.id}</div>
       <div class="day-hero-title">${d.titulo}</div>
@@ -529,16 +902,19 @@ function renderDay(){
     <div class="day-actions">
       <button class="btn-outline" onclick="openPlanner()">📓 ABRIR PLANNER DO DIA</button>
       ${isDone
-        ?`<button class="btn-primary" onclick="goHome()">✓ DIA CONCLUÍDO</button>`
+        ?`<button class="btn-primary" onclick="backFromDay()">✓ DIA CONCLUÍDO</button>`
         :`<button class="btn-primary" onclick="completeDay(${d.id})">CONCLUIR DIA ${d.id}</button>`}
     </div>`;
 }
 
-function goHome(){ renderHome(); show('home'); }
+function backFromDay(){
+  if(prevScreen==='biblioteca'){ renderBiblioteca(); show('biblioteca'); }
+  else { renderJornada(); navTo('jornada'); }
+}
 
-/* ══════════════════════════
+/* ═══════════════════════════
    PLANNER
-══════════════════════════ */
+═══════════════════════════ */
 function openPlanner(){ renderPlanner(); show('planner'); }
 
 function renderPlanner(){
@@ -549,7 +925,7 @@ function renderPlanner(){
   }).join('');
   document.getElementById('screen-planner').innerHTML=`
     <div class="planner-hero">
-      <button class="back-btn" onclick="backToDay()">←</button>
+      <button class="back-btn" onclick="savePlanner();renderDay();show('day')">←</button>
       <div class="planner-hero-title">Planner · Dia ${d.id}</div>
       <div class="planner-hero-sub">${ph.label} · ${d.titulo.toUpperCase()}</div>
       <div class="saved-badge" id="savedBadge">✓ Salvo</div>
@@ -580,7 +956,7 @@ function renderPlanner(){
         <textarea class="pinput" id="pDaySpec" rows="3" placeholder="Sua resposta…" oninput="autosave()" style="background:#fff">${sv.daySpec||''}</textarea>
       </div>
     </div>
-    <div class="save-cta"><button class="btn-primary" onclick="savePlanner()">SALVAR PLANNER</button></div>`;
+    <div class="save-cta"><button class="btn-primary" onclick="savePlanner();toast('Planner salvo 🌿')">SALVAR PLANNER</button></div>`;
 }
 
 let _emoSel=null;
@@ -601,11 +977,10 @@ function savePlanner(){
   const b=document.getElementById('savedBadge');
   if(b){b.classList.add('show');setTimeout(()=>b.classList.remove('show'),2000);}
 }
-function backToDay(){ savePlanner(); renderDay(); show('day'); }
 
-/* ══════════════════════════
+/* ═══════════════════════════
    CONCLUSÃO
-══════════════════════════ */
+═══════════════════════════ */
 function completeDay(id){
   if(!S.completedDays.includes(id)) S.completedDays.push(id);
   if(id>=S.currentDay) S.currentDay=Math.min(id+1,21);
@@ -617,16 +992,15 @@ function completeDay(id){
     <div class="complete-title">${isLast?'Jornada<br>Completa':`Dia ${id}<br>Concluído`}</div>
     <p class="complete-quote">"${d.quote}"</p>
     <p class="complete-next">${isLast?'21 dias de clareza. Você chegou.':`Dia ${id+1} te espera amanhã 🌿`}</p>
-    <button class="complete-btn" onclick="afterComplete()">${isLast?'VER MINHA JORNADA':'VOLTAR AO INÍCIO'}</button>`;
+    <button class="complete-btn" onclick="renderInicio();navTo('inicio')">VOLTAR AO INÍCIO</button>`;
   show('complete');
 }
-function afterComplete(){ renderHome(); show('home'); }
 
-/* ══════════════════════════
+/* ═══════════════════════════
    BOOT
-══════════════════════════ */
+═══════════════════════════ */
 function boot(){
-  if(load()&&S.token){ updateStreak(); renderHome(); show('home'); }
+  if(load()&&S.token){ updateStreak(); renderInicio(); navTo('inicio'); }
   else { show('access'); document.getElementById('tokenInput').focus(); }
 }
 
