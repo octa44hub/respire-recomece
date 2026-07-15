@@ -795,7 +795,23 @@
 </head>
 <body>
 <div id="app">
-  <div id="screen-access" class="screen"></div>
+  <div id="screen-access" class="screen">
+    <div class="access-logo">
+      <span class="brand">RESPIRE</span>
+      <span class="e">— e —</span>
+      <span class="brand">RECOMECE</span>
+      <span class="tagline">21 DIAS · CLAREZA · PROSPERIDADE</span>
+    </div>
+    <div class="access-ornament">✦</div>
+    <div class="access-card">
+      <h2>Bem-vinda de volta</h2>
+      <p>Digite o código de acesso<br>enviado após sua compra</p>
+      <input class="token-input" id="tokenInput" type="text" placeholder="Seu código" maxlength="12" autocomplete="off" spellcheck="false">
+      <button class="btn-primary" onclick="handleAccess()">ACESSAR MINHA JORNADA</button>
+      <p class="access-error" id="accessError">Código inválido. Verifique e tente novamente.</p>
+      <p class="demo-hint">Protótipo: use o código <span>RESPIRE</span></p>
+    </div>
+  </div>
   <div id="screen-home"   class="screen hidden"></div>
   <div id="screen-day"    class="screen hidden"></div>
   <div id="screen-planner" class="screen hidden"></div>
@@ -1057,28 +1073,19 @@ function toast(msg) {
    RENDER — ACCESS
 ═══════════════════════════════════════ */
 function renderAccess() {
-  const el = document.getElementById('screen-access');
-  el.innerHTML = `
-    <div class="access-logo">
-      <span class="brand">RESPIRE</span>
-      <span class="e">— e —</span>
-      <span class="brand">RECOMECE</span>
-      <span class="tagline">21 DIAS · CLAREZA · PROSPERIDADE</span>
-    </div>
-    <div class="access-ornament">✦</div>
-    <div class="access-card">
-      <h2>Bem-vinda de volta</h2>
-      <p>Digite o código de acesso<br>enviado após sua compra</p>
-      <input class="token-input" id="tokenInput" type="text" placeholder="Seu código" maxlength="12" autocomplete="off" spellcheck="false">
-      <button class="btn-primary" onclick="handleAccess()">ACESSAR MINHA JORNADA</button>
-      <p class="access-error" id="accessError">Código inválido. Verifique e tente novamente.</p>
-      <p class="demo-hint">Protótipo: use o código <span>RESPIRE</span></p>
-    </div>
-  `;
+  // Conteúdo já está no HTML estático; apenas reconecta eventos e foca
   const inp = document.getElementById('tokenInput');
-  inp.addEventListener('keydown', e => { if (e.key === 'Enter') handleAccess(); });
-  inp.focus();
+  if (inp) {
+    inp.value = '';
+    inp.removeEventListener('keydown', _tokenKeydown);
+    inp.addEventListener('keydown', _tokenKeydown);
+    inp.focus();
+  }
+  const err = document.getElementById('accessError');
+  if (err) err.style.display = 'none';
 }
+
+function _tokenKeydown(e) { if (e.key === 'Enter') handleAccess(); }
 
 function handleAccess() {
   const val = document.getElementById('tokenInput').value.trim().toUpperCase();
@@ -1417,7 +1424,12 @@ if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js').catch(() => {});
 }
 
-boot();
+// Garante que o DOM está pronto antes de rodar
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', boot);
+} else {
+  boot();
+}
 </script>
 </body>
 </html>
