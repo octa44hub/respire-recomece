@@ -38,14 +38,13 @@
     /* screens com nav bottom precisam de padding-bottom */
     .has-nav { padding-bottom:var(--nav-h); }
 
-    /* screens fullscreen (acesso, conclusão) */
-    .fullscreen {
+    /* screens fullscreen (acesso, conclusão) — flex só quando .active */
+    .screen.active.fullscreen {
+      display:flex;
       min-height:100vh;
-      display:flex !important;
       flex-direction:column; align-items:center; justify-content:center;
       text-align:center;
     }
-    .fullscreen.hidden-screen { display:none !important; }
 
     /* ════════════════════════════
        BOTTOM NAV
