@@ -1,0 +1,1423 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#2C4A32">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Respire e Recomece">
+  <meta name="description" content="21 dias para reduzir a ansiedade, reprogramar sua mente e retomar o controle da sua vida.">
+  <title>Respire e Recomece</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --green-dark:  #2C4A32;
+      --green-mid:   #3D6B48;
+      --green-light: #5A8A65;
+      --cream:       #F7F3ED;
+      --cream-dark:  #EDE8DF;
+      --gold:        #C9A96E;
+      --gold-light:  #E8D5A3;
+      --gold-pale:   #F5EDD8;
+      --purple:      #7B5EA7;
+      --text-dark:   #1A1A1A;
+      --text-mid:    #4A4A4A;
+      --text-light:  #8A8A8A;
+      --white:       #FFFFFF;
+      --shadow:      0 4px 24px rgba(44,74,50,0.12);
+      --shadow-sm:   0 2px 12px rgba(44,74,50,0.08);
+      --radius:      16px;
+    }
+
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+    html, body {
+      height: 100%;
+      overflow: hidden;
+      background: var(--cream);
+      font-family: 'Jost', sans-serif;
+      color: var(--text-dark);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    #app {
+      height: 100%;
+      max-width: 430px;
+      margin: 0 auto;
+      position: relative;
+      overflow: hidden;
+      background: var(--cream);
+    }
+
+    /* ─── SCREENS ─── */
+    .screen {
+      position: absolute;
+      inset: 0;
+      overflow-y: auto;
+      overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
+      background: var(--cream);
+      transition: opacity .25s ease, transform .25s ease;
+    }
+    .screen.hidden { display: none; }
+    ::-webkit-scrollbar { display: none; }
+
+    /* ─── SHARED COMPONENTS ─── */
+    .back-btn {
+      position: absolute;
+      top: 52px;
+      left: 18px;
+      background: rgba(255,255,255,.12);
+      border: none;
+      border-radius: 10px;
+      width: 38px;
+      height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--cream);
+      font-size: 20px;
+      z-index: 10;
+      transition: background .2s;
+    }
+    .back-btn:active { background: rgba(255,255,255,.2); }
+
+    .btn-primary {
+      display: block;
+      width: 100%;
+      background: var(--gold);
+      color: var(--green-dark);
+      border: none;
+      border-radius: 14px;
+      padding: 17px;
+      font-family: 'Jost', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .btn-primary:active { transform: scale(.98); opacity: .9; }
+
+    .btn-outline {
+      display: block;
+      width: 100%;
+      background: transparent;
+      color: var(--green-dark);
+      border: 1.5px solid var(--green-dark);
+      border-radius: 14px;
+      padding: 15px;
+      font-family: 'Jost', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: all .2s;
+      margin-bottom: 10px;
+    }
+    .btn-outline:active { background: rgba(44,74,50,.05); }
+
+    /* ─── ACCESS SCREEN ─── */
+    #screen-access {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100%;
+      padding: 48px 28px 56px;
+      background: linear-gradient(155deg, #1E3325 0%, var(--green-dark) 45%, var(--green-mid) 100%);
+      overflow-y: auto;
+    }
+
+    .access-logo { text-align: center; margin-bottom: 48px; }
+    .access-logo .brand {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 44px;
+      font-weight: 300;
+      letter-spacing: 5px;
+      color: var(--cream);
+      line-height: 1.05;
+      display: block;
+    }
+    .access-logo .e {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 16px;
+      font-weight: 300;
+      letter-spacing: 6px;
+      color: var(--gold);
+      display: block;
+      margin: 4px 0;
+    }
+    .access-logo .tagline {
+      font-size: 10px;
+      font-family: 'Jost', sans-serif;
+      font-weight: 300;
+      letter-spacing: 3px;
+      color: rgba(247,243,237,.5);
+      margin-top: 12px;
+      display: block;
+    }
+
+    .access-ornament {
+      color: var(--gold);
+      font-size: 20px;
+      margin-bottom: 40px;
+      opacity: 0.6;
+    }
+
+    .access-card {
+      width: 100%;
+      background: rgba(255,255,255,.07);
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 22px;
+      padding: 32px 24px;
+      backdrop-filter: blur(8px);
+    }
+
+    .access-card h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 22px;
+      font-weight: 400;
+      color: var(--cream);
+      text-align: center;
+      margin-bottom: 6px;
+    }
+    .access-card p {
+      font-size: 12px;
+      color: rgba(247,243,237,.5);
+      text-align: center;
+      margin-bottom: 24px;
+      line-height: 1.6;
+      letter-spacing: .3px;
+    }
+
+    .token-input {
+      width: 100%;
+      background: rgba(255,255,255,.1);
+      border: 1px solid rgba(255,255,255,.18);
+      border-radius: 12px;
+      padding: 16px 20px;
+      font-family: 'Jost', sans-serif;
+      font-size: 18px;
+      font-weight: 500;
+      color: var(--cream);
+      outline: none;
+      letter-spacing: 4px;
+      text-align: center;
+      text-transform: uppercase;
+      transition: border-color .2s;
+      margin-bottom: 14px;
+    }
+    .token-input::placeholder { color: rgba(247,243,237,.25); letter-spacing: 2px; font-size: 13px; }
+    .token-input:focus { border-color: var(--gold); }
+
+    .access-error {
+      color: #FFAAAA;
+      font-size: 12px;
+      text-align: center;
+      margin-top: 10px;
+      display: none;
+    }
+
+    .demo-hint {
+      font-size: 11px;
+      color: rgba(247,243,237,.35);
+      text-align: center;
+      margin-top: 16px;
+      letter-spacing: .5px;
+    }
+    .demo-hint span { color: var(--gold); opacity: .7; }
+
+    /* ─── HOME SCREEN ─── */
+    #screen-home { background: var(--cream); padding-bottom: 88px; }
+
+    .home-header {
+      background: var(--green-dark);
+      padding: 52px 22px 28px;
+    }
+
+    .home-header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 20px;
+    }
+
+    .home-brand .name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 24px;
+      font-weight: 400;
+      color: var(--cream);
+      letter-spacing: 1px;
+      display: block;
+    }
+    .home-brand .sub {
+      font-size: 10px;
+      font-weight: 300;
+      letter-spacing: 2.5px;
+      color: var(--gold-light);
+      text-transform: uppercase;
+    }
+
+    .streak-pill {
+      background: rgba(201,169,110,.15);
+      border: 1px solid rgba(201,169,110,.4);
+      border-radius: 20px;
+      padding: 8px 14px;
+      text-align: center;
+      min-width: 60px;
+    }
+    .streak-pill .flame { font-size: 14px; display: block; line-height: 1; }
+    .streak-pill .count {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--gold);
+      line-height: 1;
+      display: block;
+    }
+    .streak-pill .slabel {
+      font-size: 8px;
+      color: var(--gold-light);
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+
+    .progress-wrap { }
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+    .progress-label span {
+      font-size: 11px;
+      color: rgba(247,243,237,.45);
+      letter-spacing: .5px;
+    }
+    .progress-bar {
+      height: 3px;
+      background: rgba(255,255,255,.1);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: var(--gold);
+      border-radius: 2px;
+      transition: width .6s ease;
+    }
+
+    .home-content { padding: 20px 16px; }
+
+    .phase-card {
+      background: var(--white);
+      border-radius: 20px;
+      margin-bottom: 14px;
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .phase-head {
+      padding: 16px 18px 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 1px solid var(--cream);
+    }
+
+    .phase-indicator {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+    .p1 .phase-indicator { background: #EAF2EB; }
+    .p2 .phase-indicator { background: #FBF3E4; }
+    .p3 .phase-indicator { background: #EFE8F5; }
+
+    .phase-info { flex: 1; }
+    .phase-week {
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      display: block;
+      margin-bottom: 2px;
+    }
+    .p1 .phase-week { color: var(--green-light); }
+    .p2 .phase-week { color: #A07830; }
+    .p3 .phase-week { color: var(--purple); }
+
+    .phase-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 17px;
+      font-weight: 500;
+      color: var(--text-dark);
+      display: block;
+    }
+
+    .phase-count {
+      font-size: 11px;
+      color: var(--text-light);
+      font-weight: 400;
+    }
+
+    .days-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 6px;
+      padding: 14px 14px 16px;
+    }
+
+    .day-dot {
+      aspect-ratio: 1;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 500;
+      position: relative;
+      transition: transform .15s;
+    }
+    .day-dot.done {
+      background: var(--green-dark);
+      color: var(--cream);
+      cursor: pointer;
+    }
+    .day-dot.done:active { transform: scale(.92); }
+    .day-dot.done::after {
+      content: '✓';
+      position: absolute;
+      bottom: -1px;
+      right: -1px;
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      background: var(--gold);
+      color: var(--green-dark);
+      font-size: 7px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 11px;
+      text-align: center;
+    }
+    .day-dot.current {
+      background: var(--gold);
+      color: var(--green-dark);
+      font-weight: 700;
+      cursor: pointer;
+      animation: dotPulse 2.2s ease-in-out infinite;
+    }
+    .day-dot.current:active { transform: scale(.92); }
+    .day-dot.locked {
+      background: var(--cream);
+      color: var(--text-light);
+      border: 1.5px solid var(--cream-dark);
+    }
+
+    @keyframes dotPulse {
+      0%,100% { box-shadow: 0 0 0 0 rgba(201,169,110,.5); }
+      50%      { box-shadow: 0 0 0 7px rgba(201,169,110,0); }
+    }
+
+    /* ─── DAY SCREEN ─── */
+    #screen-day { background: var(--cream); padding-bottom: 110px; }
+
+    .day-hero {
+      background: var(--green-dark);
+      padding: 52px 22px 36px;
+      text-align: center;
+      position: relative;
+    }
+
+    .day-phase-tag {
+      display: inline-block;
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: var(--gold-light);
+      margin-bottom: 10px;
+    }
+
+    .day-num {
+      font-size: 11px;
+      letter-spacing: 3px;
+      color: rgba(247,243,237,.4);
+      text-transform: uppercase;
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    .day-title-big {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 36px;
+      font-weight: 400;
+      color: var(--cream);
+      line-height: 1.15;
+    }
+
+    .day-body { padding: 20px 16px; }
+
+    .card {
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 12px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .card-label {
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: var(--green-dark);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .card-label::after { content:''; flex:1; height:1px; background:var(--cream-dark); }
+
+    .card-text {
+      font-size: 15px;
+      line-height: 1.75;
+      color: var(--text-mid);
+    }
+    .card-text strong { color: var(--text-dark); font-weight: 600; }
+
+    .action-box {
+      background: linear-gradient(135deg, #EFF5F0 0%, #E6F0E8 100%);
+      border-left: 3px solid var(--green-dark);
+      border-radius: 12px;
+      padding: 16px 18px;
+      font-size: 15px;
+      line-height: 1.75;
+      color: var(--text-mid);
+      white-space: pre-line;
+    }
+
+    .planner-hint {
+      background: var(--gold-pale);
+      border: 1px solid var(--gold-light);
+      border-radius: 12px;
+      padding: 14px 16px;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    .planner-hint .icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+    .planner-hint .htxt {
+      font-size: 13px;
+      line-height: 1.55;
+      color: #8A6830;
+    }
+    .planner-hint .htxt strong { color: #6B5020; }
+
+    .day-cta {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 430px;
+      background: var(--cream);
+      padding: 14px 18px 32px;
+      box-shadow: 0 -4px 20px rgba(0,0,0,.07);
+      z-index: 50;
+    }
+
+    /* ─── PLANNER SCREEN ─── */
+    #screen-planner { background: var(--cream); padding-bottom: 110px; }
+
+    .planner-hero {
+      background: var(--green-dark);
+      padding: 52px 22px 28px;
+      text-align: center;
+      position: relative;
+    }
+    .planner-hero-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 30px;
+      font-weight: 400;
+      color: var(--cream);
+    }
+    .planner-hero-sub {
+      font-size: 11px;
+      color: var(--gold-light);
+      letter-spacing: 2px;
+      margin-top: 4px;
+    }
+
+    .planner-body { padding: 20px 16px; }
+
+    .pcard {
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 14px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .pcard-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 19px;
+      font-weight: 500;
+      color: var(--green-dark);
+      margin-bottom: 14px;
+    }
+
+    .emotion-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .emo-btn {
+      background: var(--cream);
+      border: 1.5px solid var(--cream-dark);
+      border-radius: 10px;
+      padding: 11px 8px;
+      font-family: 'Jost', sans-serif;
+      font-size: 13px;
+      color: var(--text-mid);
+      cursor: pointer;
+      text-align: center;
+      transition: all .18s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .emo-btn.sel {
+      background: var(--green-dark);
+      border-color: var(--green-dark);
+      color: var(--cream);
+    }
+
+    .pinput {
+      width: 100%;
+      background: var(--cream);
+      border: 1.5px solid var(--cream-dark);
+      border-radius: 10px;
+      padding: 13px 15px;
+      font-family: 'Jost', sans-serif;
+      font-size: 14px;
+      color: var(--text-dark);
+      outline: none;
+      resize: none;
+      transition: border-color .2s;
+      line-height: 1.55;
+    }
+    .pinput:focus { border-color: var(--green-mid); }
+    .pinput::placeholder { color: var(--text-light); }
+
+    .priority-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .priority-row:last-child { margin-bottom: 0; }
+    .pnum {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: var(--cream-dark);
+      color: var(--text-mid);
+      font-size: 11px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .refl-q { margin-bottom: 16px; }
+    .refl-q:last-child { margin-bottom: 0; }
+    .refl-label {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-mid);
+      display: block;
+      margin-bottom: 8px;
+      letter-spacing: .3px;
+    }
+
+    .save-cta {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 430px;
+      background: var(--cream);
+      padding: 14px 18px 32px;
+      box-shadow: 0 -4px 20px rgba(0,0,0,.07);
+      z-index: 50;
+    }
+
+    /* ─── COMPLETE SCREEN ─── */
+    #screen-complete {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100%;
+      padding: 48px 32px 64px;
+      background: linear-gradient(155deg, #1E3325 0%, var(--green-dark) 50%, var(--green-mid) 100%);
+      text-align: center;
+      overflow-y: auto;
+    }
+
+    .complete-ring {
+      width: 88px;
+      height: 88px;
+      border-radius: 50%;
+      background: rgba(201,169,110,.12);
+      border: 1.5px solid var(--gold);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 38px;
+      margin-bottom: 28px;
+      animation: cPop .5s cubic-bezier(.22,.97,.57,1.2) both;
+    }
+    @keyframes cPop {
+      0% { transform:scale(0); opacity:0; }
+      100% { transform:scale(1); opacity:1; }
+    }
+
+    .complete-day-label {
+      font-size: 10px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--gold-light);
+      margin-bottom: 10px;
+    }
+
+    .complete-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 38px;
+      font-weight: 300;
+      color: var(--cream);
+      line-height: 1.1;
+      margin-bottom: 20px;
+    }
+
+    .complete-quote {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 18px;
+      font-style: italic;
+      color: rgba(247,243,237,.65);
+      line-height: 1.65;
+      margin-bottom: 12px;
+      padding: 0 8px;
+    }
+
+    .complete-next {
+      font-size: 11px;
+      color: rgba(247,243,237,.35);
+      letter-spacing: 1px;
+      margin-bottom: 40px;
+    }
+
+    .complete-btn {
+      background: var(--gold);
+      color: var(--green-dark);
+      border: none;
+      border-radius: 14px;
+      padding: 17px 40px;
+      font-family: 'Jost', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .complete-btn:active { transform: scale(.97); }
+
+    /* ─── TOAST ─── */
+    .toast {
+      position: fixed;
+      bottom: 100px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--green-dark);
+      color: var(--cream);
+      padding: 12px 22px;
+      border-radius: 30px;
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: .5px;
+      opacity: 0;
+      transition: all .3s ease;
+      z-index: 999;
+      white-space: nowrap;
+      pointer-events: none;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* ─── SAVED INDICATOR ─── */
+    .saved-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: var(--green-dark);
+      color: var(--cream);
+      border-radius: 20px;
+      padding: 5px 12px;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: .5px;
+      opacity: 0;
+      transition: opacity .3s;
+      position: absolute;
+      top: 14px;
+      right: 18px;
+    }
+    .saved-badge.show { opacity: 1; }
+  </style>
+</head>
+<body>
+<div id="app">
+  <div id="screen-access" class="screen"></div>
+  <div id="screen-home"   class="screen hidden"></div>
+  <div id="screen-day"    class="screen hidden"></div>
+  <div id="screen-planner" class="screen hidden"></div>
+  <div id="screen-complete" class="screen hidden"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ═══════════════════════════════════════
+   DATA — 21 DIAS
+═══════════════════════════════════════ */
+const PHASES = [
+  { id:1, label:'SEMANA 1', name:'O Detox Mental',        sub:'Limpando o Terreno para a Clareza', emoji:'🌱', color:'p1' },
+  { id:2, label:'SEMANA 2', name:'Reprogramação Mental',  sub:'Assumindo o Comando do Sistema',    emoji:'⚡', color:'p2' },
+  { id:3, label:'SEMANA 3', name:'Domínio e Prosperidade',sub:'Consolidando a Blindagem',          emoji:'✨', color:'p3' }
+];
+
+const DAYS = [
+  // ── SEMANA 1 ──
+  { id:1, semana:1,
+    titulo:'Pausa Consciente',
+    proposito:'Interromper o fluxo de reatividade biológica e desligar o modo de sobrevivência do cérebro.',
+    exemplo:'Você está em meio a uma sequência de e-mails urgentes e sente sua respiração ficar curta. Em vez de continuar, você para.',
+    acao:'Escolha 3 momentos do seu dia para parar por 1 minuto.\n\nRespire. Feche os olhos. Ouça seu corpo. Nada mais.\n\nPode ser antes do café, no banheiro, no carro ou em pé mesmo.\n\nRespire fundo e sinta o momento presente.',
+    planner:'Registre seu estado emocional antes e depois da pausa.',
+    quote:'A pausa consciente é o primeiro ato de retomada do controle.' },
+
+  { id:2, semana:1,
+    titulo:'Nomeie Suas Emoções',
+    proposito:'Reduzir a carga emocional através da rotulagem cognitiva. O que recebe nome, perde o poder de dominar.',
+    exemplo:"Em vez de dizer 'estou péssima', você identifica: 'eu estou sentindo uma pressão de urgência e frustração'.",
+    acao:'Escreva no planner como você se sentiu ao longo do dia.\n\nEscolha 2 ou 3 palavras (ex: irritada, cansada, ansiosa).\n\nSem julgar. Só escreva.',
+    planner:'Escreva 2 ou 3 palavras que descrevem como você se sentiu hoje.',
+    quote:'O que recebe nome perde o poder de dominar.' },
+
+  { id:3, semana:1,
+    titulo:'Tire a Pressão do Dia Perfeito',
+    proposito:'Eliminar a paralisia gerada pelo perfeccionismo, que é uma das maiores fontes de ansiedade silenciosa.',
+    exemplo:"Você adia o início de um projeto porque 'ainda não tem todas as respostas'. Hoje, você decide começar com o que tem.",
+    acao:'Identifique uma tarefa que você está procrastinando por medo de não ser perfeita.\n\nExecute-a por apenas 15 minutos, focando apenas no progresso, não no resultado final.',
+    planner:'Escreva qual tarefa você desbloqueou hoje.',
+    quote:'Progresso, não perfeição. Esse é o caminho.' },
+
+  { id:4, semana:1,
+    titulo:'Respiração de 3 Minutos',
+    proposito:'Oxigenação cerebral estratégica para retomar o foco e a capacidade de decisão.',
+    exemplo:'Antes de uma reunião importante ou de uma decisão difícil, você utiliza a respiração como ferramenta de ancoragem.',
+    acao:'Pratique a técnica 4-4-4:\n\n• Inspire por 4 segundos\n• Segure o ar por 4 segundos\n• Expire lentamente por 4 segundos\n\nRepita este ciclo por 3 minutos.',
+    planner:'Avalie seu nível de foco de 1 a 10 após o exercício.',
+    quote:'A respiração é o interruptor biológico da clareza.' },
+
+  { id:5, semana:1,
+    titulo:'O Filtro do Essencial',
+    proposito:"Treinar a mente para distinguir entre 'barulho' (urgências alheias) e 'essencial' (seus objetivos e paz).",
+    exemplo:'Você percebe que passou 2 horas resolvendo problemas que não são seus, enquanto sua prioridade ficou parada.',
+    acao:'Olhe para sua lista de tarefas.\n\nRisque ou delegue tudo o que não contribui para sua meta principal hoje.\n\nEscolha apenas 3 prioridades inegociáveis.',
+    planner:'Liste suas 3 prioridades inegociáveis para o dia seguinte.',
+    quote:'O que não serve à sua missão, serve à sua ansiedade.' },
+
+  { id:6, semana:1,
+    titulo:'O Mini-Ritual de Proteção',
+    proposito:'Blindar o seu estado interno antes que o mundo externo (celular/notificações) invada sua mente.',
+    exemplo:'Em vez de abrir o WhatsApp assim que acorda, você dedica os primeiros minutos a si mesma.',
+    acao:'Crie um ritual de 5 minutos ao acordar:\n\n• Beba um copo de água\n• Faça um alongamento leve\n• Defina sua intenção para o dia\n\nSó ligue o celular após esse ritual.',
+    planner:"Escreva sua 'Intenção do Dia' (Ex: Hoje eu agirei com calma, independente do caos).",
+    quote:'Os primeiros minutos do dia são seus. Proteja-os.' },
+
+  { id:7, semana:1,
+    titulo:'Auditoria de Energia',
+    proposito:'Avaliar o progresso e identificar os drenos de energia para otimizar a próxima semana.',
+    exemplo:'Você percebe que certas conversas ou hábitos digitais sugam sua energia mais do que o trabalho em si.',
+    acao:'Reserve 15 minutos para revisar suas anotações da semana.\n\nIdentifique o que funcionou e o que precisa ser ajustado.',
+    planner:'Preencha a visão geral da semana e escreva uma vitória pessoal, por menor que seja.',
+    quote:'Você completou a Semana 1. O terreno está limpo. Vamos plantar.' },
+
+  // ── SEMANA 2 ──
+  { id:8, semana:2,
+    titulo:'O Despertar do Corpo',
+    proposito:'Alinhar o estado físico com o estado mental logo ao acordar, enviando um sinal de prontidão ao sistema nervoso.',
+    exemplo:'Em vez de saltar da cama para o celular, você dedica um momento para habitar o próprio corpo.',
+    acao:"Ao acordar, antes de qualquer tarefa, faça um alongamento de 3 minutos.\n\nFoque na extensão da coluna e na abertura do peito.\n\nEnquanto se alonga, afirme mentalmente: 'Meu corpo e minha mente estão em sintonia hoje'.",
+    planner:'Registre como o seu nível de energia mudou após o alongamento.',
+    quote:'O corpo que se move com intenção carrega uma mente que decide com clareza.' },
+
+  { id:9, semana:2,
+    titulo:'A Caminhada Consciente',
+    proposito:'Praticar a presença plena em movimento, treinando o foco em ambientes externos.',
+    exemplo:'Transformar o trajeto até o trabalho ou uma volta no quarteirão em um exercício de recarga mental.',
+    acao:'Caminhe por 10 minutos sem fones de ouvido.\n\nObserve o contato dos pés com o chão e os sons ao redor.\n\nSe a mente fugir para os problemas, traga-a de volta para a sensação do movimento.',
+    planner:'Identifique três coisas que você observou no caminho e que normalmente passariam despercebidas.',
+    quote:'Presença em movimento é a forma mais acessível de meditação.' },
+
+  { id:10, semana:2,
+    titulo:'Escuta e Gestão do Cansaço',
+    proposito:"Diferenciar o cansaço produtivo (que exige descanso) da procrastinação ansiosa (que exige foco).",
+    exemplo:"Você percebe que está forçando uma tarefa há horas sem resultado. É hora de aplicar a 'pausa estratégica'.",
+    acao:"No meio da tarde, faça um 'check-in' de 2 minutos.\n\nPergunte-se: 'O que meu corpo precisa agora para manter a clareza?'\n\nÀs vezes, 5 minutos de silêncio valem mais que uma hora de esforço cego.",
+    planner:'Escreva qual foi a decisão que você tomou para respeitar o seu ritmo hoje.',
+    quote:'Descanso estratégico não é fraqueza. É gestão de alto nível.' },
+
+  { id:11, semana:2,
+    titulo:'A Respiração do Foco',
+    proposito:'Utilizar o controle rítmico da respiração para estabilizar a mente antes de atividades de alto impacto.',
+    exemplo:"Antes de uma tarefa importante, você 'limpa' a mente do ruído lateral.",
+    acao:'Pratique a respiração alternada (técnica Nadi Shodhana):\n\n• Feche a narina direita, inspire pela esquerda\n• Feche a esquerda, expire pela direita\n\nRepita por 5 minutos.',
+    planner:'Defina em uma frase qual é o seu foco principal para as próximas 2 horas.',
+    quote:'Uma mente focada não tem espaço para o caos.' },
+
+  { id:12, semana:2,
+    titulo:'A Ciência da Intenção',
+    proposito:"Aplicar a clareza mental para direcionar a 'Lei da Atração' através de metas tangíveis.",
+    exemplo:"Em vez de desejar 'ter sucesso', você define exatamente qual resultado deseja alcançar e como se sentirá ao chegar lá.",
+    acao:'Escolha uma meta para os próximos 30 dias.\n\nEscreva-a no presente, como se já fosse real.\n\nVisualize os detalhes e a sensação de conquista por 5 minutos.',
+    planner:'Escreva a sua meta principal e a intenção clara que a sustenta.',
+    quote:'Clareza sobre o destino é o mapa que a prosperidade precisa.' },
+
+  { id:13, semana:2,
+    titulo:'O Poder do Autocoaching',
+    proposito:'Transformar o diálogo interno crítico em um diálogo de liderança e suporte.',
+    exemplo:"Quando cometer um erro, em vez de se punir, você se pergunta: 'O que este resultado me ensina para a próxima execução?'",
+    acao:"Sempre que um pensamento negativo surgir, confronte-o com um fato.\n\nSubstitua 'Eu não dou conta' por 'Eu estou aprendendo a gerir este desafio passo a passo'.",
+    planner:"Transcreva um pensamento negativo que você 'reprogramou' hoje.",
+    quote:'A líder mais importante da sua vida mora dentro de você.' },
+
+  { id:14, semana:2,
+    titulo:'Revisão e Alinhamento',
+    proposito:'Consolidar os aprendizados da semana e preparar a transição para a fase de Domínio e Prosperidade.',
+    exemplo:'Avaliar se as suas ações diárias estão alinhadas com a vida próspera que você deseja construir.',
+    acao:'Revise os últimos 7 dias no seu Planner.\n\nIdentifique qual prática teve o maior impacto na sua redução de ansiedade e aumento de foco.',
+    planner:"Defina: qual é o 'ruído' que você definitivamente deixará para trás amanhã?",
+    quote:'Você completou a Semana 2. Seus novos comandos estão instalados.' },
+
+  // ── SEMANA 3 ──
+  { id:15, semana:3,
+    titulo:'O Estado de Presença Total',
+    proposito:"Eliminar a dispersão mental e focar 100% da energia no 'agora' para maximizar a eficiência.",
+    exemplo:'Você está em uma reunião e, em vez de pensar no próximo compromisso, você ouve e observa cada detalhe presente.',
+    acao:'Durante uma tarefa importante hoje, elimine todas as notificações.\n\nDedique 20 minutos de foco absoluto, sentindo a sua respiração e o comando das suas mãos.\n\nSinta o domínio sobre o tempo.',
+    planner:'Descreva como a qualidade da sua entrega mudou quando você eliminou a pressa.',
+    quote:'Quem comanda o presente, comanda o futuro.' },
+
+  { id:16, semana:3,
+    titulo:'A Gratidão como Ativo',
+    proposito:'Mudar a frequência da escassez para a abundância. Quem agradece pelo que tem, cria espaço mental para receber mais.',
+    exemplo:'Em vez de focar na conta que precisa pagar, você foca na estrutura que permitiu que aquele serviço fosse utilizado.',
+    acao:'Liste 5 conquistas profissionais ou financeiras do último ano.\n\nDedique 5 minutos para sentir a satisfação real por cada uma delas, ancorando a sensação de que "o sucesso já faz parte da minha vida".',
+    planner:"Escreva: 'Eu sou grata por [X] e estou pronta para [Y]'.",
+    quote:'Gratidão não é ingenuidade. É a frequência que atrai abundância.' },
+
+  { id:17, semana:3,
+    titulo:'Visualização do Sucesso',
+    proposito:'Criar o mapa mental do seu estado de paz e sucesso absoluto para direcionar as suas ações diárias.',
+    exemplo:'Você visualiza a sua vida ou negócio funcionando com leveza, sem a necessidade de apagar fogos constantemente.',
+    acao:'Feche os olhos por 10 minutos.\n\nVisualize-se no controle total: calma, próspera e respeitada.\n\nSinta o cheiro, o ambiente e a segurança que essa posição traz.',
+    planner:'Escreva três detalhes marcantes da sua visualização de hoje.',
+    quote:'A mente não distingue entre o que vivencia e o que vividamente imagina.' },
+
+  { id:18, semana:3,
+    titulo:'Desapego Estratégico',
+    proposito:'Libertar-se da necessidade de controlar o que não depende de si, economizando energia para a execução real.',
+    exemplo:'Um imprevisto acontece e, em vez de entrar em pânico, você aceita o fato e foca imediatamente na solução.',
+    acao:"Identifique um problema que está tirando o seu sono, mas que não está sob o seu controle direto.\n\nDiga mentalmente: 'Eu liberto a necessidade de controlar isso'\n\ne volte o seu foco para a sua próxima tarefa produtiva.",
+    planner:'Qual preocupação inútil você decidiu descartar hoje?',
+    quote:'Soltar o que não é seu é o ato mais poderoso de liderança pessoal.' },
+
+  { id:19, semana:3,
+    titulo:'A Intuição nos Negócios',
+    proposito:"Aprender a ouvir a 'voz silenciosa' da clareza mental para tomar decisões mais rápidas e precisas.",
+    exemplo:'Sabe aquela sensação de que um projeto não deve seguir? Isso é a sua mente limpa operando em alto nível.',
+    acao:'Antes de uma decisão hoje, faça 3 minutos da técnica 4-4-4 (Dia 4).\n\nPergunte-se em silêncio: "Este é o melhor caminho?"\n\nOuça a primeira resposta que surgir sem o ruído da ansiedade.',
+    planner:'Registre uma situação onde a sua intuição foi confirmada pela lógica.',
+    quote:'Intuição treinada é estratégia disfarçada de instinto.' },
+
+  { id:20, semana:3,
+    titulo:'Generosidade e Fluxo',
+    proposito:'Entender que a riqueza circula através do valor que entregamos ao mundo.',
+    exemplo:'Você entrega um conteúdo ou bônus extra para alguém, superando as expectativas e gerando reciprocidade.',
+    acao:'Faça algo inesperado e positivo por alguém hoje.\n\nPode ser um elogio sincero, uma dica valiosa ou um suporte extra.\n\nSinta-se como alguém que tem tanto que pode transbordar.',
+    planner:'Como se sentiu ao ser a fonte de valor para outra pessoa hoje?',
+    quote:'Quem transborda valor, atrai valor de volta multiplicado.' },
+
+  { id:21, semana:3,
+    titulo:'O Selo do Novo Eu',
+    proposito:"Consolidar a jornada e selar o compromisso de que 'Respirar e Recomeçar' agora é o seu estilo de vida inegociável.",
+    exemplo:'Você olha para trás e percebe que a avalanche de 21 dias atrás já não tem o mesmo poder sobre si.',
+    acao:'Faça uma revisão completa do seu Planner.\n\nEscolha a sua prática favorita destes 21 dias e decrete que ela será o seu ritual matinal permanente a partir de amanhã.',
+    planner:'Escreva uma carta para si mesma daqui a um ano, descrevendo a vida próspera e calma que você consolidou a partir de hoje.',
+    quote:'Você chegou. E isso é apenas o começo da sua nova realidade.' }
+];
+
+/* ═══════════════════════════════════════
+   STATE
+═══════════════════════════════════════ */
+const DEFAULT_STATE = {
+  token: null,
+  currentDay: 1,
+  completedDays: [],
+  streak: 0,
+  lastOpened: null,
+  startDate: null,
+  plannerEntries: {}
+};
+
+let S = { ...DEFAULT_STATE };
+let activeDay = null;
+
+function saveState() { localStorage.setItem('rr_state', JSON.stringify(S)); }
+
+function loadState() {
+  const raw = localStorage.getItem('rr_state');
+  if (raw) {
+    S = { ...DEFAULT_STATE, ...JSON.parse(raw) };
+    return true;
+  }
+  return false;
+}
+
+function updateStreak() {
+  const today = new Date().toDateString();
+  if (S.lastOpened === today) return;
+  const yesterday = new Date(Date.now() - 86400000).toDateString();
+  if (S.lastOpened === yesterday) {
+    S.streak = (S.streak || 0) + 1;
+  } else if (S.lastOpened !== today) {
+    S.streak = S.lastOpened ? 1 : (S.streak || 1);
+  }
+  S.lastOpened = today;
+  saveState();
+}
+
+/* ═══════════════════════════════════════
+   NAVIGATION
+═══════════════════════════════════════ */
+const screens = ['access','home','day','planner','complete'];
+
+function show(id) {
+  screens.forEach(s => {
+    const el = document.getElementById('screen-' + s);
+    if (s === id) el.classList.remove('hidden');
+    else el.classList.add('hidden');
+    el.scrollTop = 0;
+  });
+}
+
+/* ═══════════════════════════════════════
+   TOAST
+═══════════════════════════════════════ */
+let toastTimer;
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2800);
+}
+
+/* ═══════════════════════════════════════
+   RENDER — ACCESS
+═══════════════════════════════════════ */
+function renderAccess() {
+  const el = document.getElementById('screen-access');
+  el.innerHTML = `
+    <div class="access-logo">
+      <span class="brand">RESPIRE</span>
+      <span class="e">— e —</span>
+      <span class="brand">RECOMECE</span>
+      <span class="tagline">21 DIAS · CLAREZA · PROSPERIDADE</span>
+    </div>
+    <div class="access-ornament">✦</div>
+    <div class="access-card">
+      <h2>Bem-vinda de volta</h2>
+      <p>Digite o código de acesso<br>enviado após sua compra</p>
+      <input class="token-input" id="tokenInput" type="text" placeholder="Seu código" maxlength="12" autocomplete="off" spellcheck="false">
+      <button class="btn-primary" onclick="handleAccess()">ACESSAR MINHA JORNADA</button>
+      <p class="access-error" id="accessError">Código inválido. Verifique e tente novamente.</p>
+      <p class="demo-hint">Protótipo: use o código <span>RESPIRE</span></p>
+    </div>
+  `;
+  const inp = document.getElementById('tokenInput');
+  inp.addEventListener('keydown', e => { if (e.key === 'Enter') handleAccess(); });
+  inp.focus();
+}
+
+function handleAccess() {
+  const val = document.getElementById('tokenInput').value.trim().toUpperCase();
+  const err = document.getElementById('accessError');
+  // Aceita qualquer token com 6+ caracteres (produção: validar contra Supabase)
+  if (val.length >= 6) {
+    S.token = val;
+    if (!S.startDate) S.startDate = new Date().toISOString();
+    updateStreak();
+    saveState();
+    err.style.display = 'none';
+    renderHome();
+    show('home');
+  } else {
+    err.style.display = 'block';
+  }
+}
+
+/* ═══════════════════════════════════════
+   RENDER — HOME
+═══════════════════════════════════════ */
+function renderHome() {
+  const done = S.completedDays.length;
+  const pct  = Math.round((done / 21) * 100);
+  const el   = document.getElementById('screen-home');
+
+  const phasesHTML = PHASES.map(ph => {
+    const phDays = DAYS.filter(d => d.semana === ph.id);
+    const dotsHTML = phDays.map(d => {
+      const isDone    = S.completedDays.includes(d.id);
+      const isCurrent = d.id === S.currentDay && !isDone;
+      const isLocked  = d.id > S.currentDay;
+      const cls = isDone ? 'done' : isCurrent ? 'current' : 'locked';
+      const onclick = (isDone || isCurrent) ? `onclick="openDay(${d.id})"` : '';
+      return `<div class="day-dot ${cls}" ${onclick} title="Dia ${d.id}">${d.id}</div>`;
+    }).join('');
+    return `
+      <div class="phase-card ${ph.color}">
+        <div class="phase-head">
+          <div class="phase-indicator">${ph.emoji}</div>
+          <div class="phase-info">
+            <span class="phase-week">${ph.label}</span>
+            <span class="phase-name">${ph.name}</span>
+          </div>
+          <span class="phase-count">${S.completedDays.filter(id => DAYS.find(d=>d.id===id&&d.semana===ph.id)).length}/7</span>
+        </div>
+        <div class="days-grid">${dotsHTML}</div>
+      </div>`;
+  }).join('');
+
+  el.innerHTML = `
+    <div class="home-header">
+      <div class="home-header-top">
+        <div class="home-brand">
+          <span class="name">Respire e Recomece</span>
+          <span class="sub">Sua jornada de clareza</span>
+        </div>
+        <div class="streak-pill">
+          <span class="flame">🔥</span>
+          <span class="count">${S.streak}</span>
+          <span class="slabel">dias</span>
+        </div>
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-label">
+          <span>${done} de 21 dias concluídos</span>
+          <span>${pct}%</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+      </div>
+    </div>
+    <div class="home-content">${phasesHTML}</div>
+  `;
+}
+
+/* ═══════════════════════════════════════
+   RENDER — DAY
+═══════════════════════════════════════ */
+function openDay(dayId) {
+  activeDay = DAYS.find(d => d.id === dayId);
+  if (!activeDay) return;
+  renderDay();
+  show('day');
+}
+
+function renderDay() {
+  const d   = activeDay;
+  const ph  = PHASES.find(p => p.id === d.semana);
+  const done = S.completedDays.includes(d.id);
+  const el  = document.getElementById('screen-day');
+
+  el.innerHTML = `
+    <div class="day-hero">
+      <button class="back-btn" onclick="goHome()">←</button>
+      <span class="day-phase-tag">${ph.label} · ${ph.name.toUpperCase()}</span>
+      <span class="day-num">DIA ${d.id} DE 21</span>
+      <h1 class="day-title-big">${d.titulo}</h1>
+    </div>
+    <div class="day-body">
+      <div class="card">
+        <div class="card-label">Propósito</div>
+        <p class="card-text">${d.proposito}</p>
+      </div>
+      <div class="card">
+        <div class="card-label">Exemplo</div>
+        <p class="card-text">${d.exemplo}</p>
+      </div>
+      <div class="card">
+        <div class="card-label">Sua Prática de Hoje</div>
+        <div class="action-box">${d.acao}</div>
+      </div>
+      <div class="card">
+        <div class="planner-hint">
+          <span class="icon">📓</span>
+          <div class="htxt"><strong>No seu Planner:</strong> ${d.planner}</div>
+        </div>
+      </div>
+    </div>
+    <div class="day-cta">
+      <button class="btn-outline" onclick="openPlanner(${d.id})">📓 Abrir Planner do Dia</button>
+      ${done
+        ? `<button class="btn-primary" style="opacity:.6;cursor:default">✓ Dia Concluído</button>`
+        : `<button class="btn-primary" onclick="completeDay(${d.id})">CONCLUIR DIA ${d.id}</button>`
+      }
+    </div>
+  `;
+}
+
+function goHome() {
+  renderHome();
+  show('home');
+}
+
+/* ═══════════════════════════════════════
+   RENDER — PLANNER
+═══════════════════════════════════════ */
+function openPlanner(dayId) {
+  activeDay = DAYS.find(d => d.id === dayId) || activeDay;
+  renderPlanner();
+  show('planner');
+}
+
+function renderPlanner() {
+  const d   = activeDay;
+  const ph  = PHASES.find(p => p.id === d.semana);
+  const saved = S.plannerEntries[d.id] || {};
+  const el  = document.getElementById('screen-planner');
+
+  const emotions = [
+    { key:'feliz',   label:'😊 Feliz'    },
+    { key:'calma',   label:'🌿 Calma'    },
+    { key:'ansiosa', label:'😰 Ansiosa'  },
+    { key:'cansada', label:'😴 Cansada'  }
+  ];
+
+  const emoHTML = emotions.map(e =>
+    `<button class="emo-btn ${saved.emocao === e.key ? 'sel' : ''}"
+      onclick="selectEmo('${e.key}', this)">${e.label}</button>`
+  ).join('');
+
+  el.innerHTML = `
+    <div class="planner-hero">
+      <button class="back-btn" onclick="backToDay()">←</button>
+      <div class="planner-hero-title">Planner do Dia ${d.id}</div>
+      <div class="planner-hero-sub">${ph.label} · ${d.titulo.toUpperCase()}</div>
+      <div class="saved-badge" id="savedBadge">✓ Salvo</div>
+    </div>
+    <div class="planner-body">
+
+      <div class="pcard">
+        <div class="pcard-title">Como estou ao começar o dia?</div>
+        <div class="emotion-grid">${emoHTML}</div>
+        <input class="pinput" id="pEmoCustom" type="text" placeholder="Ou descreva com suas palavras…"
+          style="margin-top:10px" value="${saved.emocaoCustom || ''}" oninput="autosave()">
+      </div>
+
+      <div class="pcard">
+        <div class="pcard-title">✦ Intenção do Dia</div>
+        <textarea class="pinput" id="pIntencao" rows="2"
+          placeholder="Ex: Hoje eu agirei com calma, independente do caos…"
+          oninput="autosave()">${saved.intencao || ''}</textarea>
+      </div>
+
+      <div class="pcard">
+        <div class="pcard-title">✅ 3 Prioridades Inegociáveis</div>
+        ${[1,2,3].map(n => `
+          <div class="priority-row">
+            <div class="pnum">${n}</div>
+            <input class="pinput" id="pPrio${n}" type="text"
+              placeholder="Prioridade ${n}…"
+              value="${saved['prio'+n] || ''}"
+              oninput="autosave()">
+          </div>`).join('')}
+      </div>
+
+      <div class="pcard">
+        <div class="pcard-title">💬 Reflexão sobre o Dia</div>
+        <div class="refl-q">
+          <label class="refl-label">1. O que eu consegui cumprir hoje?</label>
+          <textarea class="pinput" id="pRefl1" rows="2"
+            placeholder="Escreva livremente…" oninput="autosave()">${saved.refl1 || ''}</textarea>
+        </div>
+        <div class="refl-q">
+          <label class="refl-label">2. Como me senti ao longo do dia?</label>
+          <textarea class="pinput" id="pRefl2" rows="2"
+            placeholder="Escreva livremente…" oninput="autosave()">${saved.refl2 || ''}</textarea>
+        </div>
+        <div class="refl-q">
+          <label class="refl-label">3. 1 coisa que quero melhorar amanhã</label>
+          <textarea class="pinput" id="pRefl3" rows="2"
+            placeholder="Escreva livremente…" oninput="autosave()">${saved.refl3 || ''}</textarea>
+        </div>
+      </div>
+
+      <div class="pcard" style="background:var(--gold-pale);border:1px solid var(--gold-light)">
+        <div class="pcard-title" style="color:#8A6830">📓 Reflexão do Dia ${d.id}</div>
+        <p style="font-size:13px;color:#8A6830;margin-bottom:12px;line-height:1.6">${d.planner}</p>
+        <textarea class="pinput" id="pDaySpec" rows="3"
+          placeholder="Sua resposta…" oninput="autosave()"
+          style="background:white">${saved.daySpec || ''}</textarea>
+      </div>
+
+    </div>
+    <div class="save-cta">
+      <button class="btn-primary" onclick="savePlanner()">SALVAR PLANNER</button>
+    </div>
+  `;
+}
+
+let _emoSel = null;
+function selectEmo(key, btn) {
+  document.querySelectorAll('.emo-btn').forEach(b => b.classList.remove('sel'));
+  btn.classList.add('sel');
+  _emoSel = key;
+  autosave();
+}
+
+let autosaveTimer;
+function autosave() {
+  clearTimeout(autosaveTimer);
+  autosaveTimer = setTimeout(savePlanner, 800);
+}
+
+function savePlanner() {
+  if (!activeDay) return;
+  const d = activeDay;
+  const saved = S.plannerEntries[d.id] || {};
+  const emoBtn = document.querySelector('.emo-btn.sel');
+
+  S.plannerEntries[d.id] = {
+    emocao:       emoBtn ? (emoBtn.dataset.key || _emoSel || saved.emocao) : saved.emocao,
+    emocaoCustom: document.getElementById('pEmoCustom')?.value || '',
+    intencao:     document.getElementById('pIntencao')?.value  || '',
+    prio1:        document.getElementById('pPrio1')?.value     || '',
+    prio2:        document.getElementById('pPrio2')?.value     || '',
+    prio3:        document.getElementById('pPrio3')?.value     || '',
+    refl1:        document.getElementById('pRefl1')?.value     || '',
+    refl2:        document.getElementById('pRefl2')?.value     || '',
+    refl3:        document.getElementById('pRefl3')?.value     || '',
+    daySpec:      document.getElementById('pDaySpec')?.value   || '',
+    savedAt:      new Date().toISOString()
+  };
+  saveState();
+
+  // Show saved badge
+  const badge = document.getElementById('savedBadge');
+  if (badge) {
+    badge.classList.add('show');
+    setTimeout(() => badge.classList.remove('show'), 2000);
+  }
+}
+
+function backToDay() {
+  savePlanner();
+  renderDay();
+  show('day');
+}
+
+/* ═══════════════════════════════════════
+   COMPLETE DAY
+═══════════════════════════════════════ */
+function completeDay(dayId) {
+  if (!S.completedDays.includes(dayId)) {
+    S.completedDays.push(dayId);
+  }
+  // Advance current day
+  if (dayId >= S.currentDay) {
+    S.currentDay = Math.min(dayId + 1, 21);
+  }
+  // Update streak
+  updateStreak();
+  saveState();
+
+  // Render complete screen
+  const d  = DAYS.find(x => x.id === dayId);
+  const el = document.getElementById('screen-complete');
+  const isLast = dayId === 21;
+
+  el.innerHTML = `
+    <div class="complete-ring">✦</div>
+    <div class="complete-day-label">DIA ${dayId} CONCLUÍDO</div>
+    <div class="complete-title">${isLast ? 'Jornada<br>Completa' : 'Dia ${dayId}<br>Concluído'}</div>
+    <p class="complete-quote">"${d.quote}"</p>
+    <p class="complete-next">${isLast ? '21 dias de clareza. Você chegou.' : `Dia ${dayId+1} aguarda você amanhã 🌿`}</p>
+    <button class="complete-btn" onclick="afterComplete()">
+      ${isLast ? 'VER MINHA JORNADA' : 'VOLTAR AO INÍCIO'}
+    </button>
+  `;
+
+  show('complete');
+}
+
+function afterComplete() {
+  renderHome();
+  show('home');
+}
+
+/* ═══════════════════════════════════════
+   BOOT
+═══════════════════════════════════════ */
+function boot() {
+  const hasState = loadState();
+
+  if (hasState && S.token) {
+    updateStreak();
+    renderHome();
+    show('home');
+  } else {
+    renderAccess();
+    show('access');
+  }
+}
+
+// Register service worker
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+
+boot();
+</script>
+</body>
+</html>
