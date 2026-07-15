@@ -7,1055 +7,507 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Respire">
   <title>Respire e Recomece</title>
   <link rel="manifest" href="manifest.json">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
   <style>
+    /* ── RESET ── */
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    html { height:100%; }
+    body { height:100%; font-family:'Jost',sans-serif; background:#1E3325; -webkit-font-smoothing:antialiased; }
+
+    /* ── VARIÁVEIS ── */
     :root {
-      --green-deep:  #1E3325;
-      --green-dark:  #2C4A32;
-      --green-mid:   #3D6B48;
-      --cream:       #F7F3ED;
-      --cream-dark:  #EDE8DF;
-      --gold:        #C9A96E;
-      --gold-light:  #E8D5A3;
-      --gold-pale:   #F5EDD8;
-      --text-dark:   #1A1A1A;
-      --text-mid:    #4A4A4A;
-      --text-light:  #8A8A8A;
-      --radius:      16px;
+      --green-deep:#1E3325; --green-dark:#2C4A32; --green-mid:#3D6B48;
+      --cream:#F7F3ED; --cream-dark:#EDE8DF;
+      --gold:#C9A96E; --gold-light:#E8D5A3; --gold-pale:#F5EDD8;
+      --text:#1A1A1A; --text-mid:#4A4A4A; --text-light:#8A8A8A;
     }
 
-    *, *::before, *::after {
-      margin: 0; padding: 0; box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    html, body {
-      height: 100%;
-      background: #1E3325;
-      font-family: 'Jost', sans-serif;
-      -webkit-font-smoothing: antialiased;
-    }
-
-    /* ── APP SHELL ── */
+    /* ── APP WRAPPER ──
+       Ocupa 100% da tela, centraliza o conteúdo em telas largas.
+       Screens são empilhadas por display:none / display:block.
+    */
     #app {
-      position: relative;
-      height: 100%;
-      max-width: 430px;
-      margin: 0 auto;
-      overflow: hidden;
-      background: var(--cream);
+      width:100%;
+      max-width:430px;
+      margin:0 auto;
+      min-height:100vh;
+      position:relative;
+      background:var(--cream);
     }
 
     /* ── SCREENS ──
-       Cada screen ocupa todo o app.
-       O scroll acontece no .screen (overflow-y: auto).
-       O conteúdo que precisa de flex-centering usa um wrapper interno.
+       Fluxo normal — sem position:absolute.
+       Apenas a screen ativa fica visível.
     */
-    .screen {
-      position: absolute;
-      inset: 0;
-      overflow-y: auto;
-      overflow-x: hidden;
-      -webkit-overflow-scrolling: touch;
-      background: var(--cream);
-    }
-    .screen.hidden { display: none; }
-    ::-webkit-scrollbar { display: none; }
+    .screen { display:none; width:100%; }
+    .screen.active { display:block; }
 
-    /* ── ACCESS SCREEN ── */
+    /* ══════════════════════════════
+       TELA DE ACESSO
+    ══════════════════════════════ */
     #screen-access {
-      background: linear-gradient(155deg, #1E3325 0%, #2C4A32 50%, #3D6B48 100%);
+      min-height:100vh;
+      background:linear-gradient(160deg, #1E3325 0%, #2C4A32 55%, #3D6B48 100%);
+      display:flex !important;         /* override display:none quando active */
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      padding:64px 28px 80px;
+      text-align:center;
     }
+    /* Atenção: quando hidden, voltamos para display:none */
+    #screen-access.hidden-screen { display:none !important; }
 
-    /* Wrapper interno resolve o bug de flex+overflow+justify-content */
-    .access-wrap {
-      min-height: 100%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 60px 28px 72px;
-    }
-
-    .access-logo {
-      text-align: center;
-      margin-bottom: 44px;
-    }
+    .access-logo { margin-bottom:40px; }
     .access-logo .brand {
-      display: block;
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 46px;
-      font-weight: 300;
-      letter-spacing: 6px;
-      color: #F7F3ED;
-      line-height: 1.1;
+      display:block;
+      font-family:'Cormorant Garamond',serif;
+      font-size:48px;
+      font-weight:300;
+      letter-spacing:7px;
+      color:#F7F3ED;
+      line-height:1.1;
     }
     .access-logo .sep {
-      display: block;
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 15px;
-      letter-spacing: 6px;
-      color: #C9A96E;
-      margin: 6px 0;
+      display:block;
+      font-family:'Cormorant Garamond',serif;
+      font-size:15px;
+      letter-spacing:6px;
+      color:#C9A96E;
+      margin:8px 0;
     }
     .access-logo .tagline {
-      display: block;
-      font-size: 10px;
-      letter-spacing: 3.5px;
-      color: rgba(247,243,237,.45);
-      margin-top: 14px;
+      display:block;
+      font-size:10px;
+      letter-spacing:3px;
+      color:rgba(247,243,237,.4);
+      margin-top:12px;
     }
 
-    .access-ornament {
-      font-size: 18px;
-      color: #C9A96E;
-      opacity: .55;
-      margin-bottom: 36px;
-    }
+    .access-ornament { font-size:18px; color:#C9A96E; opacity:.5; margin-bottom:32px; }
 
     .access-card {
-      width: 100%;
-      background: rgba(255,255,255,.08);
-      border: 1px solid rgba(255,255,255,.14);
-      border-radius: 22px;
-      padding: 32px 24px 28px;
+      width:100%;
+      background:rgba(255,255,255,.09);
+      border:1px solid rgba(255,255,255,.14);
+      border-radius:20px;
+      padding:28px 22px 24px;
     }
-
     .access-card h2 {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 22px;
-      font-weight: 400;
-      color: #F7F3ED;
-      text-align: center;
-      margin-bottom: 8px;
+      font-family:'Cormorant Garamond',serif;
+      font-size:22px;
+      font-weight:400;
+      color:#F7F3ED;
+      margin-bottom:8px;
     }
-    .access-card .subtitle {
-      font-size: 12px;
-      color: rgba(247,243,237,.5);
-      text-align: center;
-      line-height: 1.6;
-      margin-bottom: 24px;
+    .access-card .sub {
+      font-size:12px;
+      color:rgba(247,243,237,.45);
+      line-height:1.65;
+      margin-bottom:22px;
     }
-
     .token-input {
-      display: block;
-      width: 100%;
-      background: rgba(255,255,255,.1);
-      border: 1px solid rgba(255,255,255,.2);
-      border-radius: 12px;
-      padding: 16px 20px;
-      font-family: 'Jost', sans-serif;
-      font-size: 18px;
-      font-weight: 500;
-      color: #F7F3ED;
-      letter-spacing: 4px;
-      text-align: center;
-      text-transform: uppercase;
-      outline: none;
-      margin-bottom: 14px;
-      transition: border-color .2s;
+      width:100%;
+      display:block;
+      background:rgba(255,255,255,.1);
+      border:1px solid rgba(255,255,255,.2);
+      border-radius:11px;
+      padding:15px 18px;
+      font-size:18px;
+      font-weight:500;
+      font-family:'Jost',sans-serif;
+      color:#F7F3ED;
+      letter-spacing:4px;
+      text-align:center;
+      text-transform:uppercase;
+      outline:none;
+      margin-bottom:12px;
     }
-    .token-input::placeholder { color: rgba(247,243,237,.25); letter-spacing: 2px; font-size: 13px; }
-    .token-input:focus { border-color: #C9A96E; }
+    .token-input::placeholder { color:rgba(247,243,237,.22); letter-spacing:2px; font-size:13px; }
+    .token-input:focus { border-color:#C9A96E; }
 
     .btn-access {
-      display: block;
-      width: 100%;
-      background: #C9A96E;
-      color: #2C4A32;
-      border: none;
-      border-radius: 13px;
-      padding: 17px;
-      font-family: 'Jost', sans-serif;
-      font-size: 13px;
-      font-weight: 600;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      cursor: pointer;
-      transition: opacity .2s, transform .1s;
+      width:100%;
+      display:block;
+      background:#C9A96E;
+      color:#2C4A32;
+      border:none;
+      border-radius:12px;
+      padding:16px;
+      font-family:'Jost',sans-serif;
+      font-size:13px;
+      font-weight:600;
+      letter-spacing:2px;
+      text-transform:uppercase;
+      cursor:pointer;
     }
-    .btn-access:active { opacity: .85; transform: scale(.98); }
-    .btn-access:disabled { opacity: .6; cursor: default; }
+    .btn-access:disabled { opacity:.6; }
 
     .access-error {
-      display: none;
-      color: #FFB3B3;
-      font-size: 12px;
-      text-align: center;
-      margin-top: 12px;
+      display:none;
+      color:#FFB3B3;
+      font-size:12px;
+      margin-top:10px;
     }
-    .demo-hint {
-      font-size: 11px;
-      color: rgba(247,243,237,.3);
-      text-align: center;
-      margin-top: 14px;
-      letter-spacing: .5px;
-    }
-    .demo-hint b { color: rgba(201,169,110,.65); font-weight: 500; }
+    .demo-hint { font-size:11px; color:rgba(247,243,237,.28); margin-top:12px; }
+    .demo-hint b { color:rgba(201,169,110,.6); font-weight:500; }
 
-    /* ── SHARED BUTTONS ── */
+    /* ══════════════════════════════
+       SHARED
+    ══════════════════════════════ */
     .btn-primary {
-      display: block;
-      width: 100%;
-      background: var(--gold);
-      color: var(--green-dark);
-      border: none;
-      border-radius: 14px;
-      padding: 17px;
-      font-family: 'Jost', sans-serif;
-      font-size: 13px;
-      font-weight: 600;
-      letter-spacing: 1.8px;
-      text-transform: uppercase;
-      cursor: pointer;
-      transition: opacity .2s, transform .1s;
+      display:block; width:100%;
+      background:var(--gold); color:var(--green-dark);
+      border:none; border-radius:13px; padding:16px;
+      font-family:'Jost',sans-serif; font-size:13px;
+      font-weight:600; letter-spacing:1.8px; text-transform:uppercase;
+      cursor:pointer;
     }
-    .btn-primary:active { opacity: .88; transform: scale(.98); }
-
     .btn-outline {
-      display: block;
-      width: 100%;
-      background: transparent;
-      color: var(--green-dark);
-      border: 1.5px solid var(--green-dark);
-      border-radius: 14px;
-      padding: 15px;
-      font-family: 'Jost', sans-serif;
-      font-size: 13px;
-      font-weight: 500;
-      letter-spacing: 1px;
-      cursor: pointer;
-      margin-bottom: 10px;
-      transition: background .2s;
+      display:block; width:100%;
+      background:transparent; color:var(--green-dark);
+      border:1.5px solid var(--green-dark); border-radius:13px; padding:14px;
+      font-family:'Jost',sans-serif; font-size:13px;
+      font-weight:500; letter-spacing:1px; cursor:pointer; margin-bottom:10px;
     }
-    .btn-outline:active { background: rgba(44,74,50,.06); }
-
     .back-btn {
-      position: absolute;
-      top: 52px; left: 18px;
-      background: rgba(255,255,255,.12);
-      border: none;
-      border-radius: 10px;
-      width: 38px; height: 38px;
-      display: flex; align-items: center; justify-content: center;
-      cursor: pointer;
-      color: var(--cream);
-      font-size: 20px;
-      z-index: 10;
+      position:absolute; top:52px; left:18px;
+      background:rgba(255,255,255,.12); border:none; border-radius:10px;
+      width:38px; height:38px; display:flex; align-items:center; justify-content:center;
+      cursor:pointer; color:var(--cream); font-size:20px; z-index:10;
     }
 
-    /* ── HOME SCREEN ── */
-    #screen-home { padding-bottom: 88px; }
+    /* ══════════════════════════════
+       HOME
+    ══════════════════════════════ */
+    #screen-home { padding-bottom:80px; }
 
-    .home-header {
-      background: var(--green-dark);
-      padding: 52px 22px 24px;
-    }
-    .home-header-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 18px;
-    }
-    .home-greeting {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 28px;
-      font-weight: 300;
-      color: var(--cream);
-      line-height: 1.2;
-    }
-    .home-greeting span { color: var(--gold); }
-    .streak-badge {
-      background: rgba(201,169,110,.15);
-      border: 1px solid rgba(201,169,110,.3);
-      border-radius: 10px;
-      padding: 6px 12px;
-      text-align: center;
-    }
-    .streak-badge .num {
-      display: block;
-      font-size: 20px;
-      font-weight: 600;
-      color: var(--gold);
-      line-height: 1;
-    }
-    .streak-badge .lbl {
-      font-size: 9px;
-      letter-spacing: 1.5px;
-      color: rgba(201,169,110,.7);
-    }
+    .home-header { background:var(--green-dark); padding:52px 20px 22px; }
+    .home-header-top { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:16px; }
+    .home-greeting { font-family:'Cormorant Garamond',serif; font-size:28px; font-weight:300; color:var(--cream); line-height:1.2; }
+    .home-greeting span { color:var(--gold); }
+    .streak-badge { background:rgba(201,169,110,.14); border:1px solid rgba(201,169,110,.28); border-radius:10px; padding:6px 12px; text-align:center; }
+    .streak-badge .num { display:block; font-size:20px; font-weight:600; color:var(--gold); line-height:1; }
+    .streak-badge .lbl { font-size:9px; letter-spacing:1.5px; color:rgba(201,169,110,.65); }
+    .progress-bar-wrap { background:rgba(255,255,255,.1); border-radius:8px; height:5px; margin-bottom:6px; }
+    .progress-bar-fill { background:var(--gold); height:5px; border-radius:8px; }
+    .progress-label { font-size:11px; color:rgba(247,243,237,.5); letter-spacing:.5px; }
 
-    .progress-bar-wrap {
-      background: rgba(255,255,255,.1);
-      border-radius: 8px;
-      height: 6px;
-      margin-bottom: 6px;
-    }
-    .progress-bar-fill {
-      background: var(--gold);
-      height: 6px;
-      border-radius: 8px;
-      transition: width .4s ease;
-    }
-    .progress-label {
-      font-size: 11px;
-      color: rgba(247,243,237,.55);
-      letter-spacing: .5px;
-    }
+    .home-body { padding:18px 14px; }
+    .phase-section { margin-bottom:22px; }
+    .phase-header { display:flex; align-items:center; gap:10px; padding:10px 14px; background:var(--cream-dark); border-radius:12px; margin-bottom:10px; }
+    .phase-emoji { font-size:16px; }
+    .phase-name { font-size:11px; font-weight:600; letter-spacing:1.5px; color:var(--green-dark); text-transform:uppercase; }
+    .phase-sub { font-size:11px; color:var(--text-light); margin-left:auto; }
 
-    .home-body { padding: 20px 16px; }
+    .day-card { display:flex; align-items:center; background:#fff; border-radius:13px; padding:13px 15px; margin-bottom:8px; box-shadow:0 2px 8px rgba(44,74,50,.06); cursor:pointer; border:1.5px solid transparent; }
+    .day-card.done { border-color:rgba(201,169,110,.3); background:#fffdf8; }
+    .day-card.locked { opacity:.42; cursor:default; }
+    .day-card.active-day { border-color:var(--green-mid); }
+    .day-num { width:34px; height:34px; border-radius:50%; background:var(--cream-dark); display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:600; color:var(--text-mid); margin-right:12px; flex-shrink:0; }
+    .day-card.done .day-num { background:var(--gold-pale); color:var(--green-dark); }
+    .day-card.active-day .day-num { background:var(--green-dark); color:var(--cream); }
+    .day-info { flex:1; min-width:0; }
+    .day-title { font-size:14px; font-weight:500; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .day-sub { font-size:11px; color:var(--text-light); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .day-check { font-size:16px; margin-left:8px; flex-shrink:0; }
 
-    /* Phase sections */
-    .phase-section { margin-bottom: 24px; }
-    .phase-header {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 10px 14px;
-      background: var(--cream-dark);
-      border-radius: 12px;
-      margin-bottom: 10px;
-    }
-    .phase-emoji { font-size: 16px; }
-    .phase-name {
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 1.5px;
-      color: var(--green-dark);
-      text-transform: uppercase;
-    }
-    .phase-sub {
-      font-size: 11px;
-      color: var(--text-light);
-      margin-left: auto;
-    }
+    /* ══════════════════════════════
+       DIA
+    ══════════════════════════════ */
+    #screen-day { padding-bottom:100px; }
+    .day-hero { padding:52px 20px 30px; position:relative; }
+    .day-hero.p1 { background:linear-gradient(150deg,#1E3325,#2C4A32); }
+    .day-hero.p2 { background:linear-gradient(150deg,#2C3A4A,#3A5A6A); }
+    .day-hero.p3 { background:linear-gradient(150deg,#3A2C1E,#6B5A3D); }
+    .day-hero-phase { font-size:10px; letter-spacing:2px; color:rgba(201,169,110,.65); text-transform:uppercase; margin-bottom:10px; }
+    .day-hero-num { font-size:11px; letter-spacing:2px; color:rgba(247,243,237,.38); text-transform:uppercase; margin-bottom:5px; }
+    .day-hero-title { font-family:'Cormorant Garamond',serif; font-size:34px; font-weight:300; color:var(--cream); line-height:1.15; margin-bottom:18px; }
+    .day-hero-divider { width:36px; height:1px; background:rgba(201,169,110,.45); margin-bottom:14px; }
+    .day-hero-proposito { font-size:13px; color:rgba(247,243,237,.65); line-height:1.7; }
+    .day-body { padding:18px 16px; }
+    .day-section { background:#fff; border-radius:15px; padding:18px; margin-bottom:12px; box-shadow:0 2px 8px rgba(44,74,50,.06); }
+    .day-section-label { font-size:10px; font-weight:600; letter-spacing:2px; color:var(--green-mid); text-transform:uppercase; margin-bottom:10px; }
+    .day-section-text { font-size:14px; color:var(--text-mid); line-height:1.75; white-space:pre-line; }
+    .day-example { background:var(--gold-pale); border-left:3px solid var(--gold); border-radius:0 10px 10px 0; padding:13px 15px; font-size:13px; color:var(--text-mid); line-height:1.65; font-style:italic; }
+    .day-actions { padding:0 16px 20px; display:flex; flex-direction:column; gap:10px; }
 
-    .day-card {
-      display: flex;
-      align-items: center;
-      background: #fff;
-      border-radius: 14px;
-      padding: 14px 16px;
-      margin-bottom: 8px;
-      box-shadow: 0 2px 10px rgba(44,74,50,.06);
-      cursor: pointer;
-      transition: transform .15s, box-shadow .15s;
-      border: 1.5px solid transparent;
-    }
-    .day-card:active { transform: scale(.985); }
-    .day-card.done { border-color: rgba(201,169,110,.35); background: #fffdf8; }
-    .day-card.locked { opacity: .45; cursor: default; }
-    .day-card.active-day { border-color: var(--green-mid); }
+    /* ══════════════════════════════
+       PLANNER
+    ══════════════════════════════ */
+    #screen-planner { padding-bottom:100px; }
+    .planner-hero { padding:52px 20px 26px; background:linear-gradient(150deg,#1E3325,#2C4A32); position:relative; }
+    .planner-hero-title { font-family:'Cormorant Garamond',serif; font-size:26px; font-weight:300; color:var(--cream); margin-bottom:4px; }
+    .planner-hero-sub { font-size:10px; letter-spacing:1.5px; color:rgba(247,243,237,.45); text-transform:uppercase; }
+    .saved-badge { position:absolute; top:16px; right:18px; background:var(--green-mid); color:var(--cream); border-radius:20px; padding:4px 12px; font-size:11px; opacity:0; transition:opacity .3s; }
+    .saved-badge.show { opacity:1; }
+    .planner-body { padding:14px; }
+    .pcard { background:#fff; border-radius:15px; padding:16px; margin-bottom:10px; box-shadow:0 2px 8px rgba(44,74,50,.06); }
+    .pcard-title { font-size:13px; font-weight:600; color:var(--green-dark); margin-bottom:10px; }
+    .emotion-grid { display:flex; flex-wrap:wrap; gap:7px; margin-bottom:8px; }
+    .emo-btn { background:var(--cream-dark); border:1.5px solid transparent; border-radius:20px; padding:6px 13px; font-family:'Jost',sans-serif; font-size:12px; cursor:pointer; }
+    .emo-btn.sel { background:var(--gold-pale); border-color:var(--gold); }
+    .pinput { display:block; width:100%; background:var(--cream); border:1px solid var(--cream-dark); border-radius:9px; padding:11px 13px; font-family:'Jost',sans-serif; font-size:13px; color:var(--text); outline:none; resize:none; }
+    .pinput:focus { border-color:var(--green-mid); }
+    .priority-row { display:flex; align-items:center; gap:9px; margin-bottom:8px; }
+    .pnum { width:24px; height:24px; border-radius:50%; background:var(--green-dark); color:var(--cream); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:600; flex-shrink:0; }
+    .refl-q { margin-bottom:12px; }
+    .refl-label { display:block; font-size:11px; color:var(--text-light); margin-bottom:5px; }
+    .save-cta { padding:4px 14px 20px; }
 
-    .day-num {
-      width: 36px; height: 36px;
-      border-radius: 50%;
-      background: var(--cream-dark);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 13px; font-weight: 600;
-      color: var(--text-mid);
-      margin-right: 12px;
-      flex-shrink: 0;
-    }
-    .day-card.done .day-num { background: var(--gold-pale); color: var(--green-dark); }
-    .day-card.active-day .day-num { background: var(--green-dark); color: var(--cream); }
-
-    .day-info { flex: 1; min-width: 0; }
-    .day-title {
-      font-size: 14px;
-      font-weight: 500;
-      color: var(--text-dark);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .day-sub {
-      font-size: 11px;
-      color: var(--text-light);
-      margin-top: 2px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .day-check {
-      font-size: 16px;
-      margin-left: 10px;
-      flex-shrink: 0;
-    }
-
-    /* ── DAY SCREEN ── */
-    #screen-day { padding-bottom: 100px; }
-
-    .day-hero {
-      padding: 52px 22px 32px;
-      position: relative;
-    }
-    .day-hero.p1 { background: linear-gradient(150deg, #1E3325 0%, #2C4A32 100%); }
-    .day-hero.p2 { background: linear-gradient(150deg, #2C3A4A 0%, #3A5A6A 100%); }
-    .day-hero.p3 { background: linear-gradient(150deg, #3A2C1E 0%, #6B5A3D 100%); }
-
-    .day-hero-phase {
-      font-size: 10px;
-      letter-spacing: 2.5px;
-      color: rgba(201,169,110,.7);
-      text-transform: uppercase;
-      margin-bottom: 12px;
-    }
-    .day-hero-num {
-      font-size: 12px;
-      letter-spacing: 2px;
-      color: rgba(247,243,237,.4);
-      text-transform: uppercase;
-      margin-bottom: 6px;
-    }
-    .day-hero-title {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 34px;
-      font-weight: 300;
-      color: var(--cream);
-      line-height: 1.15;
-      margin-bottom: 20px;
-    }
-    .day-hero-divider {
-      width: 40px;
-      height: 1px;
-      background: rgba(201,169,110,.5);
-      margin-bottom: 16px;
-    }
-    .day-hero-proposito {
-      font-size: 13px;
-      color: rgba(247,243,237,.7);
-      line-height: 1.65;
-    }
-
-    .day-body { padding: 20px 18px; }
-
-    .day-section {
-      background: #fff;
-      border-radius: 16px;
-      padding: 20px;
-      margin-bottom: 14px;
-      box-shadow: 0 2px 10px rgba(44,74,50,.06);
-    }
-    .day-section-label {
-      font-size: 10px;
-      font-weight: 600;
-      letter-spacing: 2px;
-      color: var(--green-mid);
-      text-transform: uppercase;
-      margin-bottom: 12px;
-    }
-    .day-section-text {
-      font-size: 14px;
-      color: var(--text-mid);
-      line-height: 1.75;
-      white-space: pre-line;
-    }
-    .day-example {
-      background: var(--gold-pale);
-      border-left: 3px solid var(--gold);
-      border-radius: 0 10px 10px 0;
-      padding: 14px 16px;
-      font-size: 13px;
-      color: var(--text-mid);
-      line-height: 1.65;
-      font-style: italic;
-      margin-top: 4px;
-    }
-
-    .day-actions {
-      padding: 0 18px 24px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    /* ── PLANNER ── */
-    #screen-planner { padding-bottom: 100px; }
-
-    .planner-hero {
-      padding: 52px 22px 28px;
-      background: linear-gradient(150deg, #1E3325 0%, #2C4A32 100%);
-      position: relative;
-    }
-    .planner-hero-title {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 28px;
-      font-weight: 300;
-      color: var(--cream);
-      margin-bottom: 4px;
-    }
-    .planner-hero-sub {
-      font-size: 11px;
-      letter-spacing: 1.5px;
-      color: rgba(247,243,237,.5);
-      text-transform: uppercase;
-    }
-    .saved-badge {
-      position: absolute;
-      top: 16px; right: 18px;
-      background: var(--green-mid);
-      color: var(--cream);
-      border-radius: 20px;
-      padding: 4px 12px;
-      font-size: 11px;
-      font-weight: 500;
-      opacity: 0;
-      transition: opacity .3s;
-    }
-    .saved-badge.show { opacity: 1; }
-
-    .planner-body { padding: 16px; }
-
-    .pcard {
-      background: #fff;
-      border-radius: 16px;
-      padding: 18px;
-      margin-bottom: 12px;
-      box-shadow: 0 2px 10px rgba(44,74,50,.06);
-    }
-    .pcard-title {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--green-dark);
-      margin-bottom: 12px;
-    }
-
-    .emotion-grid {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-bottom: 8px;
-    }
-    .emo-btn {
-      background: var(--cream-dark);
-      border: 1.5px solid transparent;
-      border-radius: 20px;
-      padding: 7px 14px;
-      font-family: 'Jost', sans-serif;
-      font-size: 13px;
-      cursor: pointer;
-      transition: all .15s;
-    }
-    .emo-btn.sel {
-      background: var(--gold-pale);
-      border-color: var(--gold);
-      color: var(--green-dark);
-    }
-
-    .pinput {
-      display: block;
-      width: 100%;
-      background: var(--cream);
-      border: 1px solid var(--cream-dark);
-      border-radius: 10px;
-      padding: 12px 14px;
-      font-family: 'Jost', sans-serif;
-      font-size: 13px;
-      color: var(--text-dark);
-      outline: none;
-      resize: none;
-      transition: border-color .2s;
-    }
-    .pinput:focus { border-color: var(--green-mid); }
-
-    .priority-row {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 8px;
-    }
-    .pnum {
-      width: 26px; height: 26px;
-      border-radius: 50%;
-      background: var(--green-dark);
-      color: var(--cream);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 12px; font-weight: 600;
-      flex-shrink: 0;
-    }
-
-    .refl-q { margin-bottom: 14px; }
-    .refl-label {
-      display: block;
-      font-size: 12px;
-      color: var(--text-light);
-      margin-bottom: 6px;
-    }
-
-    .save-cta {
-      padding: 4px 16px 24px;
-    }
-
-    /* ── COMPLETE SCREEN ── */
+    /* ══════════════════════════════
+       CONCLUSÃO
+    ══════════════════════════════ */
     #screen-complete {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      background: linear-gradient(155deg, #1E3325 0%, #2C4A32 60%, #3D6B48 100%);
-      padding: 60px 28px;
+      min-height:100vh;
+      background:linear-gradient(160deg,#1E3325 0%,#2C4A32 60%,#3D6B48 100%);
+      display:flex !important;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      padding:60px 28px;
     }
-    /* complete screen não precisa do wrapper pattern pois não usa overflow-y: auto */
+    #screen-complete.hidden-screen { display:none !important; }
+    .complete-ring { width:90px; height:90px; border-radius:50%; border:1px solid rgba(201,169,110,.4); display:flex; align-items:center; justify-content:center; font-size:32px; color:var(--gold); margin-bottom:24px; }
+    .complete-day-label { font-size:10px; letter-spacing:3px; color:rgba(201,169,110,.65); text-transform:uppercase; margin-bottom:10px; }
+    .complete-title { font-family:'Cormorant Garamond',serif; font-size:40px; font-weight:300; color:var(--cream); line-height:1.15; margin-bottom:18px; }
+    .complete-quote { font-size:13px; color:rgba(247,243,237,.55); line-height:1.7; font-style:italic; margin-bottom:14px; max-width:300px; }
+    .complete-next { font-size:12px; color:rgba(247,243,237,.38); margin-bottom:32px; }
+    .complete-btn { background:var(--gold); color:var(--green-dark); border:none; border-radius:13px; padding:16px 36px; font-family:'Jost',sans-serif; font-size:13px; font-weight:600; letter-spacing:2px; text-transform:uppercase; cursor:pointer; }
 
-    .complete-ring {
-      width: 100px; height: 100px;
-      border-radius: 50%;
-      border: 1px solid rgba(201,169,110,.4);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 36px;
-      color: var(--gold);
-      margin-bottom: 28px;
-    }
-    .complete-day-label {
-      font-size: 10px;
-      letter-spacing: 3px;
-      color: rgba(201,169,110,.7);
-      text-transform: uppercase;
-      margin-bottom: 12px;
-    }
-    .complete-title {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 42px;
-      font-weight: 300;
-      color: var(--cream);
-      line-height: 1.15;
-      margin-bottom: 20px;
-    }
-    .complete-quote {
-      font-size: 14px;
-      color: rgba(247,243,237,.6);
-      line-height: 1.7;
-      font-style: italic;
-      margin-bottom: 16px;
-      max-width: 320px;
-    }
-    .complete-next {
-      font-size: 13px;
-      color: rgba(247,243,237,.4);
-      margin-bottom: 36px;
-    }
-    .complete-btn {
-      background: var(--gold);
-      color: var(--green-dark);
-      border: none;
-      border-radius: 14px;
-      padding: 17px 40px;
-      font-family: 'Jost', sans-serif;
-      font-size: 13px;
-      font-weight: 600;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      cursor: pointer;
-    }
+    /* ══════════════════════════════
+       TOAST
+    ══════════════════════════════ */
+    .toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(16px); background:var(--green-dark); color:var(--cream); padding:11px 22px; border-radius:30px; font-size:13px; opacity:0; transition:all .3s; pointer-events:none; z-index:999; white-space:nowrap; }
+    .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
 
-    /* ── TOAST ── */
-    .toast {
-      position: fixed;
-      bottom: 28px; left: 50%;
-      transform: translateX(-50%) translateY(20px);
-      background: var(--green-dark);
-      color: var(--cream);
-      padding: 12px 24px;
-      border-radius: 30px;
-      font-size: 13px;
-      font-weight: 500;
-      opacity: 0;
-      transition: all .3s;
-      pointer-events: none;
-      z-index: 999;
-      white-space: nowrap;
-    }
-    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    ::-webkit-scrollbar { display:none; }
   </style>
 </head>
 <body>
 <div id="app">
 
-  <!-- TELA DE ACESSO -->
-  <div id="screen-access" class="screen">
-    <div class="access-wrap">
-      <div class="access-logo">
-        <span class="brand">RESPIRE</span>
-        <span class="sep">— e —</span>
-        <span class="brand">RECOMECE</span>
-        <span class="tagline">21 DIAS · CLAREZA · PROSPERIDADE</span>
-      </div>
-      <div class="access-ornament">✦</div>
-      <div class="access-card">
-        <h2>Bem-vinda de volta</h2>
-        <p class="subtitle">Digite o código de acesso<br>enviado após sua compra</p>
-        <input class="token-input" id="tokenInput" type="text"
-          placeholder="Seu código" maxlength="12"
-          autocomplete="off" spellcheck="false">
-        <button class="btn-access" onclick="handleAccess()">ACESSAR MINHA JORNADA</button>
-        <p class="access-error" id="accessError">Código inválido. Verifique e tente novamente.</p>
-        <p class="demo-hint">Protótipo · use o código <b>RESPIRE</b></p>
-      </div>
+  <!-- ── ACESSO ── -->
+  <div id="screen-access" class="screen active">
+    <div class="access-logo">
+      <span class="brand">RESPIRE</span>
+      <span class="sep">— e —</span>
+      <span class="brand">RECOMECE</span>
+      <span class="tagline">21 DIAS · CLAREZA · PROSPERIDADE</span>
+    </div>
+    <div class="access-ornament">✦</div>
+    <div class="access-card">
+      <h2>Bem-vinda de volta</h2>
+      <p class="sub">Digite o código enviado<br>após sua compra</p>
+      <input class="token-input" id="tokenInput" type="text"
+        placeholder="Seu código" maxlength="12" autocomplete="off" spellcheck="false">
+      <button class="btn-access" id="btnAccess" onclick="handleAccess()">ACESSAR MINHA JORNADA</button>
+      <p class="access-error" id="accessError">Código inválido. Verifique e tente novamente.</p>
+      <p class="demo-hint">Protótipo · código de teste: <b>RESPIRE</b></p>
     </div>
   </div>
 
-  <!-- TELA HOME (gerada por JS) -->
-  <div id="screen-home" class="screen hidden"></div>
+  <!-- ── HOME ── -->
+  <div id="screen-home" class="screen"></div>
 
-  <!-- TELA DIA (gerada por JS) -->
-  <div id="screen-day" class="screen hidden"></div>
+  <!-- ── DIA ── -->
+  <div id="screen-day" class="screen"></div>
 
-  <!-- TELA PLANNER (gerada por JS) -->
-  <div id="screen-planner" class="screen hidden"></div>
+  <!-- ── PLANNER ── -->
+  <div id="screen-planner" class="screen"></div>
 
-  <!-- TELA CONCLUSÃO (gerada por JS) -->
-  <div id="screen-complete" class="screen hidden"></div>
+  <!-- ── CONCLUSÃO ── -->
+  <div id="screen-complete" class="screen"></div>
 
 </div>
 <div class="toast" id="toast"></div>
 
 <script>
-/* ═══════════════════════════
-   DADOS — 21 DIAS
-═══════════════════════════ */
+/* ══════════════════════════
+   DADOS
+══════════════════════════ */
 const PHASES = [
-  { id:1, label:'SEMANA 1', name:'O Detox Mental',         sub:'Limpando o Terreno',     emoji:'🌱', color:'p1' },
-  { id:2, label:'SEMANA 2', name:'Reprogramação Mental',   sub:'Assumindo o Comando',    emoji:'⚡', color:'p2' },
-  { id:3, label:'SEMANA 3', name:'Domínio e Prosperidade', sub:'Consolidando a Blindagem',emoji:'✨', color:'p3' }
+  {id:1,label:'SEMANA 1',name:'O Detox Mental',sub:'Limpando o Terreno',emoji:'🌱',color:'p1'},
+  {id:2,label:'SEMANA 2',name:'Reprogramação Mental',sub:'Assumindo o Comando',emoji:'⚡',color:'p2'},
+  {id:3,label:'SEMANA 3',name:'Domínio e Prosperidade',sub:'Consolidando a Blindagem',emoji:'✨',color:'p3'}
 ];
-
 const DAYS = [
-  // SEMANA 1
-  { id:1,  semana:1, titulo:'Pausa Consciente',
-    proposito:'Interromper o fluxo de reatividade e desligar o modo de sobrevivência do cérebro.',
-    exemplo:'Você está em meio a e-mails urgentes e sente a respiração encurtar. Em vez de continuar, você para.',
-    acao:'Escolha 3 momentos do dia para parar 1 minuto.\n\nRespire. Feche os olhos. Ouça seu corpo.\n\nPode ser antes do café, no banheiro ou no carro.',
-    planner:'Registre seu estado emocional antes e depois da pausa.',
-    quote:'A pausa é onde a clareza nasce.' },
-
-  { id:2,  semana:1, titulo:'Mapa da Mente',
-    proposito:'Identificar os padrões de pensamento que drenam sua energia e produtividade.',
-    exemplo:'Você percebe que fica ruminando sobre o mesmo problema às 14h todos os dias.',
-    acao:'Pegue um papel e escreva sem filtro por 10 minutos.\n\nTudo que está na sua cabeça: medos, listas, preocupações.\n\nDepois, circule o que está em seu controle.',
-    planner:'O que você descobriu sobre seus padrões de pensamento?',
-    quote:'Nomear o medo é o primeiro passo para dissolvê-lo.' },
-
-  { id:3,  semana:1, titulo:'Âncora do Presente',
-    proposito:'Treinar o cérebro para retornar ao momento atual quando a ansiedade sobre o futuro chega.',
-    exemplo:'Sua mente viaja para uma reunião de amanhã. Você usa os 5 sentidos para voltar ao agora.',
-    acao:'Pratique o método 5-4-3-2-1:\n5 coisas que você vê\n4 que pode tocar\n3 que ouve\n2 que cheira\n1 que sente.\n\nRepita sempre que a ansiedade aparecer.',
-    planner:'Em que situação você precisou usar sua âncora hoje?',
-    quote:'O presente é o único lugar onde a vida acontece.' },
-
-  { id:4,  semana:1, titulo:'Desintoxicação Digital',
-    proposito:'Reduzir o bombardeio de informações que mantém o sistema nervoso em alerta constante.',
-    exemplo:'Você percebe que checa o celular 40x por hora sem motivo.',
-    acao:'Estabeleça 3 janelas sem celular hoje (mínimo 30 min cada).\n\nDesative notificações de redes sociais.\n\nAntes de dormir: celular fora do quarto.',
-    planner:'Como se sentiu nos momentos sem o celular?',
-    quote:'Silêncio digital é luxo no século XXI.' },
-
-  { id:5,  semana:1, titulo:'Movimento Intencional',
-    proposito:'Usar o corpo como ferramenta para regular o sistema nervoso e liberar tensões acumuladas.',
-    exemplo:'Em vez de mais uma hora na cadeira, você faz 10 minutos de movimento consciente.',
-    acao:'Escolha um movimento que traga prazer — caminhar, dançar, alongar, nadar.\n\nMínimo 20 minutos, com atenção plena no seu corpo.\n\nSem podcast. Só você e o movimento.',
-    planner:'Que sensação o movimento trouxe para o seu dia?',
-    quote:'O corpo guarda a conta do que a mente ignora.' },
-
-  { id:6,  semana:1, titulo:'Gratidão Estratégica',
-    proposito:'Redirecionar o foco do cérebro do que falta para o que existe, alterando a química cerebral.',
-    exemplo:'Você treina o cérebro a perceber evidências de abundância mesmo em dias difíceis.',
-    acao:'Escreva 3 evidências de progresso de hoje — não conquistas grandiosas, pequenas vitórias.\n\nDepois, 1 pessoa que você é grata por ter na vida e por quê.',
-    planner:'Quais foram suas 3 evidências de progresso hoje?',
-    quote:'A gratidão não nega a dor — ela expande a perspectiva.' },
-
-  { id:7,  semana:1, titulo:'Revisão da Semana',
-    proposito:'Consolidar os aprendizados da primeira semana e celebrar cada avanço.',
-    exemplo:'Você percebe que já respira diferente antes de reagir.',
-    acao:'Reserve 20 minutos de silêncio.\n\nReleia suas anotações dos últimos 6 dias.\n\nResponda: O que mudou em mim esta semana?\n\nCelebre sem minimizar.',
-    planner:'Qual foi a maior mudança que você percebeu em si esta semana?',
-    quote:'Cada passo pequeno é uma revolução silenciosa.' },
-
-  // SEMANA 2
-  { id:8,  semana:2, titulo:'Identidade Interna',
-    proposito:'Separar quem você é de como você se sente — a base da estabilidade emocional.',
-    exemplo:'Você sente ansiedade mas não é ansiosa. Você sente medo mas não é o medo.',
-    acao:'Escreva 10 frases que começam com "Eu sou" — mas sem usar estados emocionais.\n\nFoco em valores, capacidades e características permanentes.',
-    planner:'Quais afirmações mais ressoaram com quem você quer ser?',
-    quote:'Você não é seus pensamentos. Você é quem os observa.' },
-
-  { id:9,  semana:2, titulo:'Crenças Limitantes',
-    proposito:'Identificar e questionar as narrativas automáticas que sabotam seu potencial.',
-    exemplo:'"Não sou boa o suficiente" aparece toda vez que uma oportunidade surge.',
-    acao:'Escreva 3 crenças limitantes que se repetem na sua cabeça.\n\nPara cada uma, pergunte: Isso é fato ou interpretação?\n\nEscreva a versão oposta como se fosse verdade.',
-    planner:'Qual crença você descobriu que tem sabotado mais você?',
-    quote:'A crença limita ou libera — você escolhe em qual acreditar.' },
-
-  { id:10, semana:2, titulo:'Gestão das Emoções',
-    proposito:'Aprender a processar emoções difíceis sem suprimi-las nem ser controlada por elas.',
-    exemplo:'Em vez de engolir a raiva ou explodir, você a nomeia e processa.',
-    acao:'Quando uma emoção difícil surgir hoje, siga o protocolo:\n1. Nomeie a emoção\n2. Localize no corpo\n3. Respire 4x (4s inspira, 4s segura, 4s expira)\n4. Pergunte: o que ela quer me dizer?',
-    planner:'Que emoção você processou diferente hoje?',
-    quote:'Sentir é humano. Ser governado por elas é opcional.' },
-
-  { id:11, semana:2, titulo:'Comunicação Assertiva',
-    proposito:'Expressar necessidades e limites com clareza, sem agressividade nem submissão.',
-    exemplo:'Você aprende a dizer não sem culpa e sim sem ressentimento.',
-    acao:'Identifique uma situação onde você costuma ceder por medo de desagradar.\n\nPratique dizer: "Não posso agora, mas posso [alternativa]" ou apenas "Não, obrigada".\n\nPratica no espelho se precisar.',
-    planner:'Em que situação você exercitou sua assertividade hoje?',
-    quote:'Seu sim vale mais quando seu não é real.' },
-
-  { id:12, semana:2, titulo:'Foco Intencional',
-    proposito:'Treinar a capacidade de concentração profunda em um mundo de distrações constantes.',
-    exemplo:'Você descobre que 2 horas de foco profundo valem mais que 8 horas fragmentadas.',
-    acao:'Defina 1 tarefa mais importante do dia.\n\nBloqueie 90 minutos: celular no avião, notificações off, porta fechada.\n\nTrabalhe só nessa tarefa. Sem multitarefas.',
-    planner:'Qual foi sua tarefa mais importante hoje? Você conseguiu fazer o bloco de foco?',
-    quote:'A atenção é a moeda mais valiosa do século XXI.' },
-
-  { id:13, semana:2, titulo:'Rituais de Alta Performance',
-    proposito:'Criar estrutura previsível que ancora o dia e reduz as decisões que drenam energia.',
-    exemplo:'Sua manhã de 30 minutos define o tom emocional do dia inteiro.',
-    acao:'Desenhe seu ritual de manhã ideal em 30 minutos:\n- 5 min: silêncio ou respiração\n- 10 min: movimento\n- 10 min: leitura ou aprendizado\n- 5 min: intenção do dia\n\nTeste amanhã.',
-    planner:'Como seria seu ritual de manhã ideal?',
-    quote:'Você não tem disciplina — você tem rituais.' },
-
-  { id:14, semana:2, titulo:'Revisão da Semana',
-    proposito:'Integrar os avanços da reprogramação e preparar o terreno para o domínio.',
-    exemplo:'Você percebe que reage diferente às situações que antes te desequilibravam.',
-    acao:'Reserve 25 minutos.\n\nReleia suas anotações desta semana.\n\nResponda: Quais padrões antigos eu começo a soltar?\n\nEscreva uma carta curta para a versão passada de você.',
-    planner:'O que você diria para a versão sua de 2 semanas atrás?',
-    quote:'A transformação não é evento — é processo diário.' },
-
-  // SEMANA 3
-  { id:15, semana:3, titulo:'Visão Clara',
-    proposito:'Definir com precisão onde você quer chegar para que o cérebro possa criar o caminho.',
-    exemplo:'Você para de agir por reação e começa a agir por intenção.',
-    acao:'Escreva como é sua vida daqui a 1 ano se você continuar nesse caminho.\n\nDetalhe: como você se sente, o que você conquistou, como são seus relacionamentos.\n\nEscreva no presente, como se já fosse realidade.',
-    planner:'Como é a versão sua de daqui a 1 ano?',
-    quote:'Onde atenção vai, energia flui.' },
-
-  { id:16, semana:3, titulo:'Limpeza de Energia',
-    proposito:'Identificar e eliminar o que drena sua energia sem entregar valor.',
-    exemplo:'Você percebe que certas pessoas, compromissos e hábitos custam mais do que entregam.',
-    acao:'Faça duas listas:\nDRENA: o que gasta minha energia?\nNUTRE: o que me dá energia?\n\nEscolha 1 coisa para eliminar ou reduzir esta semana.\nEscolha 1 coisa para ampliar.',
-    planner:'O que você vai eliminar e o que vai ampliar?',
-    quote:'Proteção de energia não é egoísmo — é sobrevivência.' },
-
-  { id:17, semana:3, titulo:'Relações Intencionais',
-    proposito:'Investir profundamente em conexões que nutrem e criar distância das que drenam.',
-    exemplo:'Você aprende a diferença entre solidão e solitude, entre presença e obrigação.',
-    acao:'Identifique 3 pessoas que energizam você.\n\nEntre em contato com uma delas hoje — não por obrigação, por escolha.\n\nDepois identifique 1 relação que está te custando mais do que nutrindo.',
-    planner:'Quem energiza você e quem drena? O que você vai fazer com isso?',
-    quote:'Você é a média das 5 pessoas com quem mais convive.' },
-
-  { id:18, semana:3, titulo:'Prosperidade como Estado',
-    proposito:'Entender que prosperidade é um estado interno antes de ser uma realidade externa.',
-    exemplo:'Você percebe que abundância começa na forma como você pensa e age.',
-    acao:'Escreva 5 formas em que você já é próspera hoje — não financeiramente, mas em vida.\n\nDepois: qual crença sobre dinheiro você herdou e que te limita?\n\nReescreva ela.',
-    planner:'Quais são suas 5 formas de prosperidade hoje?',
-    quote:'Prosperidade é um conjunto de hábitos, não um destino.' },
-
-  { id:19, semana:3, titulo:'Ação Imperfecta',
-    proposito:'Quebrar o ciclo da procrastinação e do perfeccionismo que paralisa o progresso.',
-    exemplo:'Você entende que feito imperfeito bate planejado perfeito toda vez.',
-    acao:'Identifique 1 coisa que você vem adiando por medo de não fazer certo.\n\nFaça hoje — da forma que conseguir.\n\nRegistre como foi dar esse passo.',
-    planner:'O que você fez hoje apesar do medo ou da imperfeição?',
-    quote:'Progresso, não perfeição.' },
-
-  { id:20, semana:3, titulo:'Sustentabilidade do Processo',
-    proposito:'Criar sistemas que mantenham o progresso mesmo nos dias difíceis.',
-    exemplo:'Você aprende que disciplina não é força de vontade — é estrutura.',
-    acao:'Desenhe seu sistema de manutenção:\n- 1 hábito diário inegociável (5 min)\n- 1 revisão semanal (20 min)\n- 1 prática de recarga mensal\n\nComo você vai manter o que construiu?',
-    planner:'Qual é o seu sistema de manutenção?',
-    quote:'O sistema bate a motivação todos os dias.' },
-
-  { id:21, semana:3, titulo:'Integração e Legado',
-    proposito:'Celebrar a jornada completa e ancorar os aprendizados para o próximo capítulo.',
-    exemplo:'Você reconhece que não é mais a mesma pessoa que começou há 21 dias.',
-    acao:'Releia todas as suas anotações dos 21 dias.\n\nEscreva uma carta para a versão sua de daqui a 1 ano:\nO que você quer que ela saiba?\nO que ela vai agradecer por você ter feito agora?\n\nCelebre. Você chegou.',
-    planner:'O que a versão você de daqui 1 ano precisa saber sobre essa jornada?',
-    quote:'Você não voltará ao que era. E isso é exatamente o ponto.' }
+  {id:1,semana:1,titulo:'Pausa Consciente',proposito:'Interromper o fluxo de reatividade e desligar o modo de sobrevivência do cérebro.',exemplo:'Você está em meio a e-mails urgentes e sente a respiração encurtar. Em vez de continuar, você para.',acao:'Escolha 3 momentos do dia para parar 1 minuto.\n\nRespire. Feche os olhos. Ouça seu corpo.\n\nPode ser antes do café, no banheiro ou no carro.',planner:'Registre seu estado emocional antes e depois da pausa.',quote:'A pausa é onde a clareza nasce.'},
+  {id:2,semana:1,titulo:'Mapa da Mente',proposito:'Identificar os padrões de pensamento que drenam sua energia.',exemplo:'Você percebe que fica ruminando sobre o mesmo problema às 14h todos os dias.',acao:'Escreva sem filtro por 10 minutos.\n\nTudo que está na sua cabeça: medos, listas, preocupações.\n\nDepois, circule o que está em seu controle.',planner:'O que você descobriu sobre seus padrões de pensamento?',quote:'Nomear o medo é o primeiro passo para dissolvê-lo.'},
+  {id:3,semana:1,titulo:'Âncora do Presente',proposito:'Treinar o cérebro para retornar ao momento atual quando a ansiedade chega.',exemplo:'Sua mente viaja para uma reunião de amanhã. Você usa os 5 sentidos para voltar ao agora.',acao:'Pratique o método 5-4-3-2-1:\n5 coisas que você vê\n4 que pode tocar\n3 que ouve\n2 que cheira\n1 que sente.\n\nRepita sempre que a ansiedade aparecer.',planner:'Em que situação você precisou usar sua âncora hoje?',quote:'O presente é o único lugar onde a vida acontece.'},
+  {id:4,semana:1,titulo:'Desintoxicação Digital',proposito:'Reduzir o bombardeio de informações que mantém o sistema nervoso em alerta.',exemplo:'Você percebe que checa o celular 40x por hora sem motivo.',acao:'Estabeleça 3 janelas sem celular hoje (mínimo 30 min cada).\n\nDesative notificações de redes sociais.\n\nAntes de dormir: celular fora do quarto.',planner:'Como se sentiu nos momentos sem o celular?',quote:'Silêncio digital é luxo no século XXI.'},
+  {id:5,semana:1,titulo:'Movimento Intencional',proposito:'Usar o corpo como ferramenta para regular o sistema nervoso.',exemplo:'Em vez de mais uma hora na cadeira, você faz 10 minutos de movimento consciente.',acao:'Escolha um movimento que traga prazer — caminhar, dançar, alongar.\n\nMínimo 20 minutos, com atenção plena no seu corpo.\n\nSem podcast. Só você e o movimento.',planner:'Que sensação o movimento trouxe para o seu dia?',quote:'O corpo guarda a conta do que a mente ignora.'},
+  {id:6,semana:1,titulo:'Gratidão Estratégica',proposito:'Redirecionar o foco do cérebro do que falta para o que existe.',exemplo:'Você treina o cérebro a perceber evidências de abundância mesmo em dias difíceis.',acao:'Escreva 3 evidências de progresso de hoje — pequenas vitórias.\n\nDepois, 1 pessoa que você é grata por ter na vida e por quê.',planner:'Quais foram suas 3 evidências de progresso hoje?',quote:'A gratidão não nega a dor — ela expande a perspectiva.'},
+  {id:7,semana:1,titulo:'Revisão da Semana',proposito:'Consolidar os aprendizados da primeira semana e celebrar cada avanço.',exemplo:'Você percebe que já respira diferente antes de reagir.',acao:'Reserve 20 minutos de silêncio.\n\nReleia suas anotações dos últimos 6 dias.\n\nResponda: O que mudou em mim esta semana?\n\nCelebre sem minimizar.',planner:'Qual foi a maior mudança que você percebeu em si esta semana?',quote:'Cada passo pequeno é uma revolução silenciosa.'},
+  {id:8,semana:2,titulo:'Identidade Interna',proposito:'Separar quem você é de como você se sente — a base da estabilidade emocional.',exemplo:'Você sente ansiedade mas não é ansiosa. Você sente medo mas não é o medo.',acao:'Escreva 10 frases que começam com "Eu sou" — sem usar estados emocionais.\n\nFoco em valores, capacidades e características permanentes.',planner:'Quais afirmações mais ressoaram com quem você quer ser?',quote:'Você não é seus pensamentos. Você é quem os observa.'},
+  {id:9,semana:2,titulo:'Crenças Limitantes',proposito:'Identificar e questionar as narrativas automáticas que sabotam seu potencial.',exemplo:'"Não sou boa o suficiente" aparece toda vez que uma oportunidade surge.',acao:'Escreva 3 crenças limitantes que se repetem na sua cabeça.\n\nPara cada uma, pergunte: Isso é fato ou interpretação?\n\nEscreva a versão oposta como se fosse verdade.',planner:'Qual crença você descobriu que tem sabotado mais você?',quote:'A crença limita ou libera — você escolhe em qual acreditar.'},
+  {id:10,semana:2,titulo:'Gestão das Emoções',proposito:'Aprender a processar emoções difíceis sem suprimi-las nem ser controlada por elas.',exemplo:'Em vez de engolir a raiva ou explodir, você a nomeia e processa.',acao:'Quando uma emoção difícil surgir, siga o protocolo:\n1. Nomeie a emoção\n2. Localize no corpo\n3. Respire (4s inspira, 4s segura, 4s expira)\n4. Pergunte: o que ela quer me dizer?',planner:'Que emoção você processou diferente hoje?',quote:'Sentir é humano. Ser governado por elas é opcional.'},
+  {id:11,semana:2,titulo:'Comunicação Assertiva',proposito:'Expressar necessidades e limites com clareza, sem agressividade nem submissão.',exemplo:'Você aprende a dizer não sem culpa e sim sem ressentimento.',acao:'Identifique uma situação onde você costuma ceder por medo de desagradar.\n\nPratique dizer: "Não posso agora" ou apenas "Não, obrigada".\n\nPratica no espelho se precisar.',planner:'Em que situação você exercitou sua assertividade hoje?',quote:'Seu sim vale mais quando seu não é real.'},
+  {id:12,semana:2,titulo:'Foco Intencional',proposito:'Treinar a capacidade de concentração profunda em um mundo de distrações.',exemplo:'Você descobre que 2h de foco profundo valem mais que 8h fragmentadas.',acao:'Defina 1 tarefa mais importante do dia.\n\nBloqueie 90 minutos: celular no avião, notificações off.\n\nTrabalhe só nessa tarefa. Sem multitarefas.',planner:'Qual foi sua tarefa mais importante hoje?',quote:'A atenção é a moeda mais valiosa do século XXI.'},
+  {id:13,semana:2,titulo:'Rituais de Alta Performance',proposito:'Criar estrutura previsível que ancora o dia e reduz decisões que drenam energia.',exemplo:'Sua manhã de 30 minutos define o tom emocional do dia inteiro.',acao:'Desenhe seu ritual de manhã ideal em 30 minutos:\n- 5 min: silêncio ou respiração\n- 10 min: movimento\n- 10 min: leitura\n- 5 min: intenção do dia',planner:'Como seria seu ritual de manhã ideal?',quote:'Você não tem disciplina — você tem rituais.'},
+  {id:14,semana:2,titulo:'Revisão da Semana',proposito:'Integrar os avanços da reprogramação e preparar o terreno para o domínio.',exemplo:'Você percebe que reage diferente às situações que antes te desequilibravam.',acao:'Reserve 25 minutos.\n\nReleia suas anotações desta semana.\n\nEscreva uma carta curta para a versão passada de você.',planner:'O que você diria para a versão sua de 2 semanas atrás?',quote:'A transformação não é evento — é processo diário.'},
+  {id:15,semana:3,titulo:'Visão Clara',proposito:'Definir com precisão onde você quer chegar para que o cérebro crie o caminho.',exemplo:'Você para de agir por reação e começa a agir por intenção.',acao:'Escreva como é sua vida daqui a 1 ano nesse caminho.\n\nDetalhe: como você se sente, o que conquistou, como são seus relacionamentos.\n\nEscreva no presente, como se já fosse realidade.',planner:'Como é a versão sua de daqui a 1 ano?',quote:'Onde atenção vai, energia flui.'},
+  {id:16,semana:3,titulo:'Limpeza de Energia',proposito:'Identificar e eliminar o que drena sua energia sem entregar valor.',exemplo:'Você percebe que certas pessoas e compromissos custam mais do que entregam.',acao:'Faça duas listas:\nDRENA: o que gasta minha energia?\nNUTRE: o que me dá energia?\n\nEscolha 1 coisa para eliminar e 1 para ampliar esta semana.',planner:'O que você vai eliminar e o que vai ampliar?',quote:'Proteção de energia não é egoísmo — é sobrevivência.'},
+  {id:17,semana:3,titulo:'Relações Intencionais',proposito:'Investir em conexões que nutrem e criar distância das que drenam.',exemplo:'Você aprende a diferença entre presença e obrigação.',acao:'Identifique 3 pessoas que energizam você.\n\nEntre em contato com uma hoje — por escolha, não obrigação.\n\nIdentifique 1 relação que está te custando mais do que nutrindo.',planner:'Quem energiza você e quem drena?',quote:'Você é a média das 5 pessoas com quem mais convive.'},
+  {id:18,semana:3,titulo:'Prosperidade como Estado',proposito:'Entender que prosperidade é um estado interno antes de ser uma realidade externa.',exemplo:'Você percebe que abundância começa na forma como você pensa e age.',acao:'Escreva 5 formas em que você já é próspera hoje — não financeiramente, mas em vida.\n\nQual crença sobre dinheiro você herdou que te limita?\n\nReescreva ela.',planner:'Quais são suas 5 formas de prosperidade hoje?',quote:'Prosperidade é um conjunto de hábitos, não um destino.'},
+  {id:19,semana:3,titulo:'Ação Imperfecta',proposito:'Quebrar o ciclo da procrastinação e do perfeccionismo que paralisa o progresso.',exemplo:'Você entende que feito imperfeito bate planejado perfeito toda vez.',acao:'Identifique 1 coisa que você vem adiando por medo de não fazer certo.\n\nFaça hoje — da forma que conseguir.\n\nRegistre como foi dar esse passo.',planner:'O que você fez hoje apesar do medo ou da imperfeição?',quote:'Progresso, não perfeição.'},
+  {id:20,semana:3,titulo:'Sustentabilidade do Processo',proposito:'Criar sistemas que mantenham o progresso mesmo nos dias difíceis.',exemplo:'Você aprende que disciplina não é força de vontade — é estrutura.',acao:'Desenhe seu sistema de manutenção:\n- 1 hábito diário inegociável (5 min)\n- 1 revisão semanal (20 min)\n- 1 prática de recarga mensal',planner:'Qual é o seu sistema de manutenção?',quote:'O sistema bate a motivação todos os dias.'},
+  {id:21,semana:3,titulo:'Integração e Legado',proposito:'Celebrar a jornada completa e ancorar os aprendizados para o próximo capítulo.',exemplo:'Você reconhece que não é mais a mesma pessoa que começou há 21 dias.',acao:'Releia todas as suas anotações dos 21 dias.\n\nEscreva uma carta para a versão sua de daqui a 1 ano:\nO que você quer que ela saiba?\n\nCelebre. Você chegou.',planner:'O que a versão você de daqui 1 ano precisa saber sobre essa jornada?',quote:'Você não voltará ao que era. E isso é exatamente o ponto.'}
 ];
 
-/* ═══════════════════════════
+/* ══════════════════════════
    ESTADO
-═══════════════════════════ */
-const DEFAULT = {
-  token: null, currentDay: 1, completedDays: [],
-  streak: 0, lastOpened: null, startDate: null, plannerEntries: {}
-};
-let S = { ...DEFAULT };
+══════════════════════════ */
+const DEF = {token:null,currentDay:1,completedDays:[],streak:0,lastOpened:null,startDate:null,plannerEntries:{}};
+let S = {...DEF};
 let activeDay = null;
 
-function save() { localStorage.setItem('rr_v2', JSON.stringify(S)); }
-function load() {
-  const raw = localStorage.getItem('rr_v2');
-  if (raw) { S = { ...DEFAULT, ...JSON.parse(raw) }; return true; }
+function save(){ localStorage.setItem('rr3',JSON.stringify(S)); }
+function load(){
+  try { const r=localStorage.getItem('rr3'); if(r){S={...DEF,...JSON.parse(r)};return true;} } catch(e){}
   return false;
 }
-function updateStreak() {
-  const today = new Date().toDateString();
-  if (S.lastOpened === today) return;
-  const yesterday = new Date(Date.now() - 86400000).toDateString();
-  S.streak = S.lastOpened === yesterday ? (S.streak || 0) + 1 : (S.lastOpened ? 1 : (S.streak || 1));
-  S.lastOpened = today;
-  save();
+function updateStreak(){
+  const today=new Date().toDateString();
+  if(S.lastOpened===today) return;
+  const yesterday=new Date(Date.now()-86400000).toDateString();
+  S.streak = S.lastOpened===yesterday ? (S.streak||0)+1 : (S.lastOpened ? 1 : (S.streak||1));
+  S.lastOpened=today; save();
 }
 
-/* ═══════════════════════════
+/* ══════════════════════════
    NAVEGAÇÃO
-═══════════════════════════ */
-const SCREENS = ['access','home','day','planner','complete'];
-function show(id) {
-  SCREENS.forEach(s => {
-    const el = document.getElementById('screen-' + s);
-    if (el) {
-      if (s === id) el.classList.remove('hidden');
-      else el.classList.add('hidden');
-      el.scrollTop = 0;
+   Usa classes active / hidden-screen em vez de position:absolute
+══════════════════════════ */
+const ALL_SCREENS = ['access','home','day','planner','complete'];
+
+function show(id){
+  ALL_SCREENS.forEach(s=>{
+    const el = document.getElementById('screen-'+s);
+    if(!el) return;
+    if(s===id){
+      el.classList.add('active');
+      el.classList.remove('hidden-screen');
+    } else {
+      el.classList.remove('active');
+      el.classList.add('hidden-screen');
     }
+    el.scrollTop=0;
   });
 }
 
-/* ═══════════════════════════
+/* ══════════════════════════
    TOAST
-═══════════════════════════ */
-let _tTimer;
-function toast(msg) {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.classList.add('show');
-  clearTimeout(_tTimer);
-  _tTimer = setTimeout(() => el.classList.remove('show'), 2800);
+══════════════════════════ */
+let _tt;
+function toast(msg){
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.classList.add('show');
+  clearTimeout(_tt); _tt=setTimeout(()=>el.classList.remove('show'),2800);
 }
 
-/* ═══════════════════════════
+/* ══════════════════════════
    ACCESS
-═══════════════════════════ */
-document.getElementById('tokenInput').addEventListener('keydown', e => {
-  if (e.key === 'Enter') handleAccess();
+══════════════════════════ */
+document.getElementById('tokenInput').addEventListener('keydown', e=>{
+  if(e.key==='Enter') handleAccess();
 });
 
-async function handleAccess() {
+async function handleAccess(){
   const val = document.getElementById('tokenInput').value.trim().toUpperCase();
   const err = document.getElementById('accessError');
-  const btn = document.querySelector('.btn-access');
+  const btn = document.getElementById('btnAccess');
 
-  if (val.length < 6) {
-    err.style.display = 'block';
-    err.textContent = 'Código precisa ter ao menos 6 caracteres.';
-    return;
+  if(val.length < 6){
+    err.textContent='Código precisa ter ao menos 6 caracteres.';
+    err.style.display='block'; return;
   }
 
-  btn.textContent = 'VERIFICANDO...';
-  btn.disabled = true;
-  err.style.display = 'none';
+  btn.textContent='VERIFICANDO...'; btn.disabled=true; err.style.display='none';
 
   try {
-    const res = await fetch('/api/validate-token', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ token: val })
+    const res = await fetch('/api/validate-token',{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({token:val})
     });
     const data = await res.json();
-
-    if (data.valid) {
-      S.token = val;
-      if (!S.startDate) S.startDate = new Date().toISOString();
-      updateStreak();
-      save();
-      renderHome();
-      show('home');
+    if(data.valid){
+      S.token=val;
+      if(!S.startDate) S.startDate=new Date().toISOString();
+      updateStreak(); save(); renderHome(); show('home');
     } else {
-      err.textContent = 'Código inválido. Verifique e tente novamente.';
-      err.style.display = 'block';
-      btn.textContent = 'ACESSAR MINHA JORNADA';
-      btn.disabled = false;
+      err.textContent='Código inválido. Verifique e tente novamente.';
+      err.style.display='block';
+      btn.textContent='ACESSAR MINHA JORNADA'; btn.disabled=false;
     }
-  } catch (e) {
-    err.textContent = 'Erro de conexão. Tente novamente.';
-    err.style.display = 'block';
-    btn.textContent = 'ACESSAR MINHA JORNADA';
-    btn.disabled = false;
+  } catch(e){
+    err.textContent='Erro de conexão. Tente novamente.';
+    err.style.display='block';
+    btn.textContent='ACESSAR MINHA JORNADA'; btn.disabled=false;
   }
 }
 
-/* ═══════════════════════════
+/* ══════════════════════════
    HOME
-═══════════════════════════ */
-function renderHome() {
-  const done = S.completedDays.length;
-  const pct  = Math.round((done / 21) * 100);
-  const el   = document.getElementById('screen-home');
-
-  const phasesHTML = PHASES.map(ph => {
-    const days = DAYS.filter(d => d.semana === ph.id);
-    const daysHTML = days.map(d => {
-      const isDone   = S.completedDays.includes(d.id);
-      const isActive = d.id === S.currentDay;
-      const isLocked = d.id > S.currentDay && !isDone;
-      let cls = 'day-card';
-      if (isDone)   cls += ' done';
-      if (isActive) cls += ' active-day';
-      if (isLocked) cls += ' locked';
-      const onclick = isLocked ? '' : `onclick="openDay(${d.id})"`;
-      return `
-        <div class="${cls}" ${onclick}>
-          <div class="day-num">${isDone ? '✓' : d.id}</div>
-          <div class="day-info">
-            <div class="day-title">${d.titulo}</div>
-            <div class="day-sub">${d.proposito.substring(0,55)}…</div>
-          </div>
-          <div class="day-check">${isDone ? '🌿' : isActive ? '▶' : isLocked ? '🔒' : ''}</div>
-        </div>`;
-    }).join('');
-
-    return `
-      <div class="phase-section">
-        <div class="phase-header">
-          <span class="phase-emoji">${ph.emoji}</span>
-          <span class="phase-name">${ph.label} · ${ph.name}</span>
-          <span class="phase-sub">${ph.sub}</span>
+══════════════════════════ */
+function renderHome(){
+  const done=S.completedDays.length, pct=Math.round(done/21*100);
+  const el=document.getElementById('screen-home');
+  const phasesHTML=PHASES.map(ph=>{
+    const days=DAYS.filter(d=>d.semana===ph.id);
+    const dHTML=days.map(d=>{
+      const isDone=S.completedDays.includes(d.id);
+      const isActive=d.id===S.currentDay;
+      const isLocked=d.id>S.currentDay&&!isDone;
+      let cls='day-card'+(isDone?' done':'')+(isActive?' active-day':'')+(isLocked?' locked':'');
+      const click=isLocked?'':` onclick="openDay(${d.id})"`;
+      return `<div class="${cls}"${click}>
+        <div class="day-num">${isDone?'✓':d.id}</div>
+        <div class="day-info">
+          <div class="day-title">${d.titulo}</div>
+          <div class="day-sub">${d.proposito.substring(0,52)}…</div>
         </div>
-        ${daysHTML}
+        <div class="day-check">${isDone?'🌿':isActive?'▶':isLocked?'🔒':''}</div>
       </div>`;
+    }).join('');
+    return `<div class="phase-section">
+      <div class="phase-header">
+        <span class="phase-emoji">${ph.emoji}</span>
+        <span class="phase-name">${ph.label} · ${ph.name}</span>
+        <span class="phase-sub">${ph.sub}</span>
+      </div>${dHTML}
+    </div>`;
   }).join('');
 
-  el.innerHTML = `
+  el.innerHTML=`
     <div class="home-header">
       <div class="home-header-top">
         <div class="home-greeting">Sua jornada<br><span>de 21 dias</span></div>
         <div class="streak-badge">
-          <span class="num">${S.streak || 1}</span>
-          <span class="lbl">DIA${S.streak !== 1 ? 'S' : ''}</span>
+          <span class="num">${S.streak||1}</span>
+          <span class="lbl">DIA${S.streak!==1?'S':''}</span>
         </div>
       </div>
-      <div class="progress-bar-wrap">
-        <div class="progress-bar-fill" style="width:${pct}%"></div>
-      </div>
-      <div class="progress-label">${done} de 21 dias completos · ${pct}%</div>
+      <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${pct}%"></div></div>
+      <div class="progress-label">${done} de 21 completos · ${pct}%</div>
     </div>
-    <div class="home-body">${phasesHTML}</div>
-  `;
+    <div class="home-body">${phasesHTML}</div>`;
 }
 
-/* ═══════════════════════════
+/* ══════════════════════════
    DIA
-═══════════════════════════ */
-function openDay(id) {
-  activeDay = DAYS.find(d => d.id === id);
-  renderDay();
-  show('day');
-}
+══════════════════════════ */
+function openDay(id){ activeDay=DAYS.find(d=>d.id===id); renderDay(); show('day'); }
 
-function renderDay() {
-  const d  = activeDay;
-  const ph = PHASES.find(p => p.id === d.semana);
-  const el = document.getElementById('screen-day');
-  const isDone = S.completedDays.includes(d.id);
-
-  el.innerHTML = `
+function renderDay(){
+  const d=activeDay, ph=PHASES.find(p=>p.id===d.semana);
+  const isDone=S.completedDays.includes(d.id);
+  document.getElementById('screen-day').innerHTML=`
     <div class="day-hero ${ph.color}">
       <button class="back-btn" onclick="goHome()">←</button>
       <div class="day-hero-phase">${ph.label} · ${ph.name}</div>
@@ -1077,39 +529,25 @@ function renderDay() {
     <div class="day-actions">
       <button class="btn-outline" onclick="openPlanner()">📓 ABRIR PLANNER DO DIA</button>
       ${isDone
-        ? `<button class="btn-primary" onclick="goHome()">✓ DIA CONCLUÍDO</button>`
-        : `<button class="btn-primary" onclick="completeDay(${d.id})">CONCLUIR DIA ${d.id}</button>`
-      }
-    </div>
-  `;
+        ?`<button class="btn-primary" onclick="goHome()">✓ DIA CONCLUÍDO</button>`
+        :`<button class="btn-primary" onclick="completeDay(${d.id})">CONCLUIR DIA ${d.id}</button>`}
+    </div>`;
 }
 
-function goHome() {
-  renderHome();
-  show('home');
-}
+function goHome(){ renderHome(); show('home'); }
 
-/* ═══════════════════════════
+/* ══════════════════════════
    PLANNER
-═══════════════════════════ */
-function openPlanner() {
-  renderPlanner();
-  show('planner');
-}
+══════════════════════════ */
+function openPlanner(){ renderPlanner(); show('planner'); }
 
-function renderPlanner() {
-  const d    = activeDay;
-  const ph   = PHASES.find(p => p.id === d.semana);
-  const sv   = S.plannerEntries[d.id] || {};
-  const el   = document.getElementById('screen-planner');
-
-  const eموHTML = ['😊 Feliz','🌿 Calma','😰 Ansiosa','😴 Cansada'].map(e => {
-    const key = e.split(' ')[1].toLowerCase();
-    return `<button class="emo-btn ${sv.emocao===key?'sel':''}"
-      onclick="selectEmo('${key}',this)">${e}</button>`;
+function renderPlanner(){
+  const d=activeDay, ph=PHASES.find(p=>p.id===d.semana), sv=S.plannerEntries[d.id]||{};
+  const eHTML=['😊 Feliz','🌿 Calma','😰 Ansiosa','😴 Cansada'].map(e=>{
+    const k=e.split(' ')[1].toLowerCase();
+    return `<button class="emo-btn ${sv.emocao===k?'sel':''}" onclick="selectEmo('${k}',this)">${e}</button>`;
   }).join('');
-
-  el.innerHTML = `
+  document.getElementById('screen-planner').innerHTML=`
     <div class="planner-hero">
       <button class="back-btn" onclick="backToDay()">←</button>
       <div class="planner-hero-title">Planner · Dia ${d.id}</div>
@@ -1119,154 +557,82 @@ function renderPlanner() {
     <div class="planner-body">
       <div class="pcard">
         <div class="pcard-title">Como estou ao começar o dia?</div>
-        <div class="emotion-grid">${eموHTML}</div>
-        <input class="pinput" id="pEmoCustom" type="text"
-          placeholder="Ou descreva com suas palavras…"
-          style="margin-top:10px" value="${sv.emocaoCustom||''}"
-          oninput="autosave()">
+        <div class="emotion-grid">${eHTML}</div>
+        <input class="pinput" id="pEmoCustom" type="text" placeholder="Ou descreva com suas palavras…" style="margin-top:8px" value="${sv.emocaoCustom||''}" oninput="autosave()">
       </div>
       <div class="pcard">
         <div class="pcard-title">✦ Intenção do Dia</div>
-        <textarea class="pinput" id="pIntencao" rows="2"
-          placeholder="Hoje eu vou…" oninput="autosave()">${sv.intencao||''}</textarea>
+        <textarea class="pinput" id="pIntencao" rows="2" placeholder="Hoje eu vou…" oninput="autosave()">${sv.intencao||''}</textarea>
       </div>
       <div class="pcard">
         <div class="pcard-title">✅ 3 Prioridades Inegociáveis</div>
-        ${[1,2,3].map(n=>`
-          <div class="priority-row">
-            <div class="pnum">${n}</div>
-            <input class="pinput" id="pPrio${n}" type="text"
-              placeholder="Prioridade ${n}…"
-              value="${sv['prio'+n]||''}" oninput="autosave()">
-          </div>`).join('')}
+        ${[1,2,3].map(n=>`<div class="priority-row"><div class="pnum">${n}</div><input class="pinput" id="pPrio${n}" type="text" placeholder="Prioridade ${n}…" value="${sv['prio'+n]||''}" oninput="autosave()"></div>`).join('')}
       </div>
       <div class="pcard">
         <div class="pcard-title">💬 Reflexão do Dia</div>
-        <div class="refl-q">
-          <label class="refl-label">1. O que eu consegui hoje?</label>
-          <textarea class="pinput" id="pRefl1" rows="2"
-            placeholder="Escreva livremente…" oninput="autosave()">${sv.refl1||''}</textarea>
-        </div>
-        <div class="refl-q">
-          <label class="refl-label">2. Como me senti ao longo do dia?</label>
-          <textarea class="pinput" id="pRefl2" rows="2"
-            placeholder="Escreva livremente…" oninput="autosave()">${sv.refl2||''}</textarea>
-        </div>
-        <div class="refl-q">
-          <label class="refl-label">3. O que quero melhorar amanhã?</label>
-          <textarea class="pinput" id="pRefl3" rows="2"
-            placeholder="Escreva livremente…" oninput="autosave()">${sv.refl3||''}</textarea>
-        </div>
+        <div class="refl-q"><label class="refl-label">1. O que eu consegui hoje?</label><textarea class="pinput" id="pRefl1" rows="2" placeholder="Escreva livremente…" oninput="autosave()">${sv.refl1||''}</textarea></div>
+        <div class="refl-q"><label class="refl-label">2. Como me senti ao longo do dia?</label><textarea class="pinput" id="pRefl2" rows="2" placeholder="Escreva livremente…" oninput="autosave()">${sv.refl2||''}</textarea></div>
+        <div class="refl-q"><label class="refl-label">3. O que quero melhorar amanhã?</label><textarea class="pinput" id="pRefl3" rows="2" placeholder="Escreva livremente…" oninput="autosave()">${sv.refl3||''}</textarea></div>
       </div>
       <div class="pcard" style="background:var(--gold-pale);border:1px solid var(--gold-light)">
-        <div class="pcard-title" style="color:#8A6830">📓 Reflexão Específica · Dia ${d.id}</div>
+        <div class="pcard-title" style="color:#8A6830">📓 Reflexão · Dia ${d.id}</div>
         <p style="font-size:13px;color:#8A6830;line-height:1.6;margin-bottom:10px">${d.planner}</p>
-        <textarea class="pinput" id="pDaySpec" rows="3"
-          placeholder="Sua resposta…" oninput="autosave()"
-          style="background:#fff">${sv.daySpec||''}</textarea>
+        <textarea class="pinput" id="pDaySpec" rows="3" placeholder="Sua resposta…" oninput="autosave()" style="background:#fff">${sv.daySpec||''}</textarea>
       </div>
     </div>
-    <div class="save-cta">
-      <button class="btn-primary" onclick="savePlanner()">SALVAR PLANNER</button>
-    </div>
-  `;
+    <div class="save-cta"><button class="btn-primary" onclick="savePlanner()">SALVAR PLANNER</button></div>`;
 }
 
-let _emoSel = null;
-function selectEmo(key, btn) {
-  document.querySelectorAll('.emo-btn').forEach(b => b.classList.remove('sel'));
-  btn.classList.add('sel');
-  _emoSel = key;
-  autosave();
-}
-
-let _asTimer;
-function autosave() {
-  clearTimeout(_asTimer);
-  _asTimer = setTimeout(savePlanner, 800);
-}
-
-function savePlanner() {
-  if (!activeDay) return;
-  const id = activeDay.id;
-  S.plannerEntries[id] = {
-    emocao:       _emoSel || (S.plannerEntries[id]||{}).emocao,
-    emocaoCustom: document.getElementById('pEmoCustom')?.value  || '',
-    intencao:     document.getElementById('pIntencao')?.value   || '',
-    prio1:        document.getElementById('pPrio1')?.value      || '',
-    prio2:        document.getElementById('pPrio2')?.value      || '',
-    prio3:        document.getElementById('pPrio3')?.value      || '',
-    refl1:        document.getElementById('pRefl1')?.value      || '',
-    refl2:        document.getElementById('pRefl2')?.value      || '',
-    refl3:        document.getElementById('pRefl3')?.value      || '',
-    daySpec:      document.getElementById('pDaySpec')?.value    || '',
-    savedAt:      new Date().toISOString()
+let _emoSel=null;
+function selectEmo(k,btn){ document.querySelectorAll('.emo-btn').forEach(b=>b.classList.remove('sel')); btn.classList.add('sel'); _emoSel=k; autosave(); }
+let _asT; function autosave(){ clearTimeout(_asT); _asT=setTimeout(savePlanner,800); }
+function savePlanner(){
+  if(!activeDay) return;
+  const id=activeDay.id, sv=S.plannerEntries[id]||{};
+  S.plannerEntries[id]={
+    emocao:_emoSel||sv.emocao, emocaoCustom:document.getElementById('pEmoCustom')?.value||'',
+    intencao:document.getElementById('pIntencao')?.value||'',
+    prio1:document.getElementById('pPrio1')?.value||'', prio2:document.getElementById('pPrio2')?.value||'',
+    prio3:document.getElementById('pPrio3')?.value||'', refl1:document.getElementById('pRefl1')?.value||'',
+    refl2:document.getElementById('pRefl2')?.value||'', refl3:document.getElementById('pRefl3')?.value||'',
+    daySpec:document.getElementById('pDaySpec')?.value||'', savedAt:new Date().toISOString()
   };
   save();
-  const badge = document.getElementById('savedBadge');
-  if (badge) { badge.classList.add('show'); setTimeout(()=>badge.classList.remove('show'),2000); }
+  const b=document.getElementById('savedBadge');
+  if(b){b.classList.add('show');setTimeout(()=>b.classList.remove('show'),2000);}
 }
+function backToDay(){ savePlanner(); renderDay(); show('day'); }
 
-function backToDay() {
-  savePlanner();
-  renderDay();
-  show('day');
-}
-
-/* ═══════════════════════════
+/* ══════════════════════════
    CONCLUSÃO
-═══════════════════════════ */
-function completeDay(id) {
-  if (!S.completedDays.includes(id)) S.completedDays.push(id);
-  if (id >= S.currentDay) S.currentDay = Math.min(id + 1, 21);
-  updateStreak();
-  save();
-
-  const d = DAYS.find(x => x.id === id);
-  const isLast = id === 21;
-  const el = document.getElementById('screen-complete');
-
-  el.innerHTML = `
+══════════════════════════ */
+function completeDay(id){
+  if(!S.completedDays.includes(id)) S.completedDays.push(id);
+  if(id>=S.currentDay) S.currentDay=Math.min(id+1,21);
+  updateStreak(); save();
+  const d=DAYS.find(x=>x.id===id), isLast=id===21;
+  document.getElementById('screen-complete').innerHTML=`
     <div class="complete-ring">✦</div>
     <div class="complete-day-label">DIA ${id} CONCLUÍDO</div>
-    <div class="complete-title">${isLast ? 'Jornada<br>Completa' : `Dia ${id}<br>Concluído`}</div>
+    <div class="complete-title">${isLast?'Jornada<br>Completa':`Dia ${id}<br>Concluído`}</div>
     <p class="complete-quote">"${d.quote}"</p>
-    <p class="complete-next">${isLast ? '21 dias de clareza. Você chegou.' : `Dia ${id+1} te espera amanhã 🌿`}</p>
-    <button class="complete-btn" onclick="afterComplete()">
-      ${isLast ? 'VER MINHA JORNADA' : 'VOLTAR AO INÍCIO'}
-    </button>
-  `;
+    <p class="complete-next">${isLast?'21 dias de clareza. Você chegou.':`Dia ${id+1} te espera amanhã 🌿`}</p>
+    <button class="complete-btn" onclick="afterComplete()">${isLast?'VER MINHA JORNADA':'VOLTAR AO INÍCIO'}</button>`;
   show('complete');
 }
+function afterComplete(){ renderHome(); show('home'); }
 
-function afterComplete() {
-  renderHome();
-  show('home');
-}
-
-/* ═══════════════════════════
+/* ══════════════════════════
    BOOT
-═══════════════════════════ */
-function boot() {
-  if (load() && S.token) {
-    updateStreak();
-    renderHome();
-    show('home');
-  } else {
-    show('access');
-    document.getElementById('tokenInput').focus();
-  }
+══════════════════════════ */
+function boot(){
+  if(load()&&S.token){ updateStreak(); renderHome(); show('home'); }
+  else { show('access'); document.getElementById('tokenInput').focus(); }
 }
 
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js').catch(() => {});
-}
-
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', boot);
-} else {
-  boot();
-}
+if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
+if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot);
+else boot();
 </script>
 </body>
 </html>
