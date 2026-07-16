@@ -139,9 +139,10 @@ module.exports = async function handler(req, res) {
   console.log('[cakto-webhook] body:', JSON.stringify(req.body))
   console.log('[cakto-webhook] headers:', JSON.stringify(req.headers))
 
-  // Autenticação via header ou query param
-  const secret = req.headers['x-webhook-secret'] || req.query?.secret
+  // Autenticação — a Cakto envia o secret no body como "secret"
+  const secret = req.body?.secret || req.headers['x-webhook-secret'] || req.query?.secret
   if (process.env.WEBHOOK_SECRET && secret !== process.env.WEBHOOK_SECRET) {
+    console.log('[cakto-webhook] secret inválido:', secret)
     return res.status(401).json({ error: 'Unauthorized' })
   }
 
