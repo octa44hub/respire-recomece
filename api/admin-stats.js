@@ -12,7 +12,7 @@ module.exports = async function handler(req, res) {
     return res.status(401).json({ error: 'Unauthorized' })
   }
 
-  const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY)
+  const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SECRET_KEY)
 
   // Busca todos os tokens
   const { data: tokens, error: tokensError } = await supabase

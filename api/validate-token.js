@@ -13,7 +13,7 @@ module.exports = async function handler(req, res) {
 
   const supabase = createClient(
     process.env.SUPABASE_URL,
-    process.env.SUPABASE_ANON_KEY
+    process.env.SUPABASE_SECRET_KEY
   )
 
   const { data, error } = await supabase

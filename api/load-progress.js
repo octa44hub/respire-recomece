@@ -10,7 +10,7 @@ module.exports = async function handler(req, res) {
   const { token } = req.body || {}
   if (!token) return res.status(400).json({ ok: false, error: 'token é obrigatório' })
 
-  const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY)
+  const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SECRET_KEY)
 
   const { data, error } = await supabase
     .from('progress')

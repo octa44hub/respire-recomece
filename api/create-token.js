@@ -157,7 +157,7 @@ module.exports = async function handler(req, res) {
     return res.status(200).json({ ok: false, message: 'E-mail não encontrado', body: req.body })
   }
 
-  const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY)
+  const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SECRET_KEY)
 
   // ── CANCELAMENTO / REEMBOLSO → desativa o token ──────────────────────────
   if (action === 'cancelled') {
